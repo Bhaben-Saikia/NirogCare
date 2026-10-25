@@ -4,6 +4,8 @@
  * and enforces daily spend caps for Gemini tokens and ElevenLabs character credits.
  */
 
+import { getElevenLabsKeyCount } from './elevenLabsPool';
+
 interface UserUsage {
   minuteCount: number;
   minuteResetAt: number;
@@ -19,7 +21,15 @@ const MAX_REQUESTS_PER_DAY = 300;
 
 // Daily global spend caps (configurable via server env)
 const MAX_DAILY_GEMINI_TOKENS = Number(process.env.DAILY_GEMINI_TOKEN_CAP || 250_000);
-const MAX_DAILY_ELEVENLABS_CHARS = Number(process.env.DAILY_ELEVENLABS_CHAR_CAP || 30_000);
+
+export function getMaxDailyElevenLabsChars(): number {
+  if (process.env.DAILY_ELEVENLABS_CHAR_CAP) {
+    const val = Number(process.env.DAILY_ELEVENLABS_CHAR_CAP);
+    if (!isNaN(val) && val > 0) return val;
+  }
+  const keyCount = getElevenLabsKeyCount();
+  return Math.max(30_000, keyCount * 10_000);
+}
 
 let dailySpendResetAt = Date.now() + 24 * 60 * 60 * 1000;
 let dailyGeminiTokensUsed = 0;
@@ -109,7 +119,8 @@ export function recordGeminiTokenUsage(estimatedTokens: number): void {
 
 export function checkAndRecordElevenLabsCredits(charCount: number): boolean {
   resetDailySpendIfNeeded(Date.now());
-  if (dailyElevenLabsCharsUsed + charCount > MAX_DAILY_ELEVENLABS_CHARS) {
+  const maxCap = getMaxDailyElevenLabsChars();
+  if (dailyElevenLabsCharsUsed + charCount > maxCap) {
     return false;
   }
   dailyElevenLabsCharsUsed += charCount;
@@ -122,6 +133,6 @@ export function getSpendCapSnapshot() {
     dailyGeminiTokensUsed,
     maxDailyGeminiTokens: MAX_DAILY_GEMINI_TOKENS,
     dailyElevenLabsCharsUsed,
-    maxDailyElevenLabsChars: MAX_DAILY_ELEVENLABS_CHARS
+    maxDailyElevenLabsChars: getMaxDailyElevenLabsChars()
   };
 }

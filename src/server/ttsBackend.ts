@@ -32,6 +32,7 @@ import {
   type LanguageCode
 } from '../config/characters';
 import { checkAndRecordElevenLabsCredits } from './rateLimiter';
+import { elevenLabsPool } from './elevenLabsPool';
 
 function getEnvVar(key: string): string {
   if (process.env[key]) return process.env[key]!;
@@ -243,8 +244,7 @@ class ElevenLabsTtsProvider implements TtsProvider {
     _fallbackRate?: number,
     onFirstSubFrame?: (subFrame: TtsStreamResult) => void
   ): Promise<TtsStreamResult> {
-    const elevenLabsKey = getEnvVar('ELEVENLABS_API_KEY');
-    if (!elevenLabsKey || elevenLabsKey.length < 10) {
+    if (elevenLabsPool.getKeyCount() === 0) {
       throw new Error('ELEVENLABS_API_KEY_NOT_CONFIGURED');
     }
 
@@ -253,22 +253,61 @@ class ElevenLabsTtsProvider implements TtsProvider {
     }
 
     return runSerializedElevenLabs(async () => {
-      for (let attempt = 0; attempt < 2; attempt++) {
+      const maxAttempts = Math.max(2, elevenLabsPool.getKeyCount() * 2);
+      const attemptedKeys = new Set<string>();
+
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const slot = elevenLabsPool.getNextKey();
+        if (!slot) {
+          throw new Error('ELEVENLABS_ALL_KEYS_EXHAUSTED');
+        }
+
+        if (attemptedKeys.has(slot.key) && attemptedKeys.size >= elevenLabsPool.getKeyCount()) {
+          throw new Error('ELEVENLABS_ALL_KEYS_EXHAUSTED');
+        }
+        attemptedKeys.add(slot.key);
+
         try {
-          return await this.performRequest(
-            elevenLabsKey,
+          const result = await this.performRequest(
+            slot.key,
             text,
             langCode,
             voiceId,
             modelId,
             onFirstSubFrame
           );
+          elevenLabsPool.recordUsage(slot.key, text.length);
+          return result;
         } catch (err: unknown) {
           const msg = err instanceof Error ? err.message : '';
-          if (attempt === 0 && msg === 'ELEVENLABS_HTTP_429') {
-            await new Promise((r) => setTimeout(r, 380));
+
+          if (
+            msg.startsWith('ELEVENLABS_QUOTA_EXCEEDED') ||
+            msg.includes('401') ||
+            msg.includes('quota') ||
+            msg.includes('credit')
+          ) {
+            const remaining = elevenLabsPool.markExhausted(slot.key, 'quota_exceeded');
+            if (remaining > 0) {
+              continue; // Automatically fail over to the next key in the pool
+            }
+            throw new Error('ELEVENLABS_ALL_KEYS_EXHAUSTED');
+          }
+
+          if (msg.startsWith('ELEVENLABS_HTTP_429')) {
+            elevenLabsPool.markRateLimited(slot.key, 6000);
+            if (elevenLabsPool.getAvailableKeys().length > 0) {
+              continue; // Concurrency limit hit on this key; rotate to next key from another account
+            }
+            await new Promise((r) => setTimeout(r, 450));
             continue;
           }
+
+          if (attemptedKeys.size < elevenLabsPool.getKeyCount()) {
+            console.warn(`[ElevenLabs Pool] Error with key ${slot.masked}: ${msg}. Rotating to next key...`);
+            continue;
+          }
+
           throw err;
         }
       }
@@ -315,6 +354,24 @@ class ElevenLabsTtsProvider implements TtsProvider {
       });
 
       if (!res.ok || !res.body) {
+        let errDetail = '';
+        try {
+          errDetail = await res.text();
+        } catch {
+          // Ignore read error
+        }
+        if (
+          res.status === 401 ||
+          res.status === 400 ||
+          errDetail.includes('quota_exceeded') ||
+          errDetail.includes('quota limit') ||
+          errDetail.includes('credit')
+        ) {
+          throw new Error(`ELEVENLABS_QUOTA_EXCEEDED:${res.status}`);
+        }
+        if (res.status === 429) {
+          throw new Error(`ELEVENLABS_HTTP_429`);
+        }
         throw new Error(`ELEVENLABS_HTTP_${res.status}`);
       }
 

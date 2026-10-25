@@ -35,3 +35,6 @@ env.txt
 
 # Firebase
 .firebase/
+
+# Scratch & temporary test scripts
+scratch/

@@ -9,6 +9,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { stripPII } from './piiStripper';
+import { elevenLabsPool } from './elevenLabsPool';
 
 function getEnvVar(key: string): string {
   if (process.env[key]) return process.env[key]!;
@@ -67,8 +68,7 @@ export async function transcribeAudioChunk(
     };
   }
 
-  const elevenKey = getEnvVar('ELEVENLABS_API_KEY');
-  if (!elevenKey) {
+  if (elevenLabsPool.getKeyCount() === 0) {
     return {
       text: '',
       languageCode: langNorm,
@@ -78,62 +78,92 @@ export async function transcribeAudioChunk(
     };
   }
 
-  try {
-    const rawBase64 = req.audioBase64.includes(';base64,')
-      ? req.audioBase64.split(';base64,')[1]
-      : req.audioBase64;
-    const audioBytes = Buffer.from(rawBase64, 'base64');
-    const mimeType = req.mimeType || 'audio/webm';
-    const ext = mimeType.includes('wav') ? 'wav' : mimeType.includes('mp4') ? 'mp4' : 'webm';
+  const rawBase64 = req.audioBase64.includes(';base64,')
+    ? req.audioBase64.split(';base64,')[1]
+    : req.audioBase64;
+  const audioBytes = Buffer.from(rawBase64, 'base64');
+  const mimeType = req.mimeType || 'audio/webm';
+  const ext = mimeType.includes('wav') ? 'wav' : mimeType.includes('mp4') ? 'mp4' : 'webm';
 
-    const form = new FormData();
-    form.append('model_id', 'scribe_v1');
-    form.append('language_code', scribeLang);
-    form.append(
-      'file',
-      new Blob([audioBytes], { type: mimeType }),
-      `utterance.${ext}`
-    );
+  const maxAttempts = Math.max(2, elevenLabsPool.getKeyCount());
+  const attemptedKeys = new Set<string>();
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const slot = elevenLabsPool.getNextKey();
+    if (!slot || (attemptedKeys.has(slot.key) && attemptedKeys.size >= elevenLabsPool.getKeyCount())) {
+      break;
+    }
+    attemptedKeys.add(slot.key);
 
-    const res = await fetch('https://api.elevenlabs.io/v1/speech-to-text', {
-      method: 'POST',
-      headers: {
-        'xi-api-key': elevenKey
-      },
-      signal: controller.signal,
-      body: form
-    });
-    clearTimeout(timeoutId);
+    try {
+      const form = new FormData();
+      form.append('model_id', 'scribe_v1');
+      form.append('language_code', scribeLang);
+      form.append(
+        'file',
+        new Blob([audioBytes], { type: mimeType }),
+        `utterance.${ext}`
+      );
 
-    if (!res.ok) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+      const res = await fetch('https://api.elevenlabs.io/v1/speech-to-text', {
+        method: 'POST',
+        headers: {
+          'xi-api-key': slot.key
+        },
+        signal: controller.signal,
+        body: form
+      });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 400) {
+          elevenLabsPool.markExhausted(slot.key, 'quota_exceeded');
+          continue;
+        }
+        if (res.status === 429) {
+          elevenLabsPool.markRateLimited(slot.key, 6000);
+          continue;
+        }
+        return {
+          text: '',
+          languageCode: langNorm,
+          sttDurationMs: Date.now() - t0,
+          provider: 'empty',
+          error: `STT_HTTP_${res.status}`
+        };
+      }
+
+      const data = (await res.json()) as { text?: string };
+      const cleanText = stripPII((data.text || '').trim()).cleanText;
+
+      return {
+        text: cleanText,
+        languageCode: langNorm,
+        sttDurationMs: Date.now() - t0,
+        provider: 'elevenlabs-scribe'
+      };
+    } catch {
+      if (attemptedKeys.size < elevenLabsPool.getKeyCount()) {
+        continue;
+      }
       return {
         text: '',
         languageCode: langNorm,
         sttDurationMs: Date.now() - t0,
         provider: 'empty',
-        error: `STT_HTTP_${res.status}`
+        error: 'STT_EXCEPTION'
       };
     }
-
-    const data = (await res.json()) as { text?: string };
-    const cleanText = stripPII((data.text || '').trim()).cleanText;
-
-    return {
-      text: cleanText,
-      languageCode: langNorm,
-      sttDurationMs: Date.now() - t0,
-      provider: 'elevenlabs-scribe'
-    };
-  } catch {
-    return {
-      text: '',
-      languageCode: langNorm,
-      sttDurationMs: Date.now() - t0,
-      provider: 'empty',
-      error: 'STT_EXCEPTION'
-    };
   }
+
+  return {
+    text: '',
+    languageCode: langNorm,
+    sttDurationMs: Date.now() - t0,
+    provider: 'empty',
+    error: 'STT_ALL_KEYS_EXHAUSTED'
+  };
 }

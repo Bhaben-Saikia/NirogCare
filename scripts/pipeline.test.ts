@@ -13,6 +13,7 @@ import assert from 'node:assert/strict';
 import { ChunkSplitter, checkOutputChunkSafety } from '../src/server/chunkSplitter';
 import { detectRedFlags } from '../src/server/redFlags';
 import { checkRateLimit, checkAndRecordElevenLabsCredits, getSpendCapSnapshot } from '../src/server/rateLimiter';
+import { parseKeyString, elevenLabsPool } from '../src/server/elevenLabsPool';
 import { mapCharacterToViseme } from '../src/audio/audioEngine';
 import { buildOfflineClinicalReply } from '../src/server/offlineClinicalFallback';
 
@@ -221,6 +222,39 @@ test('rateLimiter: tracks ElevenLabs character spend cap accurately', () => {
   const after = getSpendCapSnapshot();
   assert.equal(ok, true);
   assert.equal(after.dailyElevenLabsCharsUsed, before.dailyElevenLabsCharsUsed + 50);
+});
+
+test('elevenLabsPool: parseKeyString handles commas, semicolons, quotes, and ignores invalid keys', () => {
+  const parsed = parseKeyString('"key_1234567890, key_abcdefghij; key_9876543210\nshort"');
+  assert.deepEqual(parsed, ['key_1234567890', 'key_abcdefghij', 'key_9876543210']);
+});
+
+test('elevenLabsPool: rotates across multiple keys and auto-fails over when a key is exhausted', () => {
+  const oldEnv = process.env.ELEVENLABS_API_KEY;
+  process.env.ELEVENLABS_API_KEY = 'test_eleven_key_11111, test_eleven_key_22222, test_eleven_key_33333';
+  elevenLabsPool.refreshSlots();
+
+  assert.equal(elevenLabsPool.getKeyCount(), 3);
+
+  // Rotate between keys
+  const k1 = elevenLabsPool.getNextKey();
+  const k2 = elevenLabsPool.getNextKey();
+  assert.ok(k1 && k2 && k1.key !== k2.key);
+
+  // Mark k1 exhausted (quota exceeded)
+  elevenLabsPool.markExhausted(k1.key, 'quota_exceeded');
+
+  // Next calls must never return k1
+  for (let i = 0; i < 5; i++) {
+    const candidate = elevenLabsPool.getNextKey();
+    assert.ok(candidate);
+    assert.notEqual(candidate.key, k1.key, 'Exhausted key k1 must not be selected');
+  }
+
+  // Restore env
+  process.env.ELEVENLABS_API_KEY = oldEnv;
+  elevenLabsPool.resetPool();
+  elevenLabsPool.refreshSlots();
 });
 
 // ============================================================================
