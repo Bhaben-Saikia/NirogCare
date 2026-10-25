@@ -1,6 +1,6 @@
 # NirogCare - Healthcare Platform
 
-🎥 **[Watch Demo Video](https://drive.google.com/file/d/1_Am5XiA54TNi1FhmyzCG-ut23vu9eOKC/view?usp=drive_link)** | 🌐 **[Try MVP](https://nirogcare.lovable.app/)**
+🎥 **[Watch Demo Video](https://drive.google.com/file/d/1_Am5XiA54TNi1FhmyzCG-ut23vu9eOKC/view?usp=drive_link)** | 🌐 **[Live App](https://nirog-care-8e4v.vercel.app/)**
 
 A comprehensive healthcare platform providing accessible medical services through web and mobile applications. NirogCare makes everyday health guidance simple and structured for everyone.
 
