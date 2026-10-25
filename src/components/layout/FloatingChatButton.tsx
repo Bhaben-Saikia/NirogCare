@@ -5,12 +5,14 @@
 
 import { MessageCircle, X, Sparkles, Bot } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { useState } from 'react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function FloatingChatButton() {
   const [isHovered, setIsHovered] = useState(false);
   const [showTooltip, setShowTooltip] = useState(true);
+  const { t } = useTranslation();
 
   // Mouse tracking for magnetic effect
   const x = useMotionValue(0);
@@ -58,7 +60,7 @@ export default function FloatingChatButton() {
               >
                 <Sparkles className="w-4 h-4 text-primary" />
               </motion.div>
-              <span className="text-sm font-medium text-foreground">Ask AI for Health Advice</span>
+              <span className="text-sm font-medium text-foreground">{t.chat.subtitle}</span>
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -159,10 +161,10 @@ export default function FloatingChatButton() {
               >
                 <div className="flex items-center gap-2 text-sm font-semibold text-foreground mb-1">
                   <Bot className="w-4 h-4 text-primary" />
-                  AI Health Chat
+                  {t.hero.aiHealthChat}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Get instant health advice 24/7
+                  {t.hero.aiAvailable}
                 </p>
               </motion.div>
             )}

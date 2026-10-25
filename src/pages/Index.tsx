@@ -13,6 +13,10 @@ import FloatingChatButton from '@/components/layout/FloatingChatButton';
 import EmergencyBanner from '@/components/layout/EmergencyBanner';
 import Footer from '@/components/layout/Footer';
 import { pageTransition, staggerContainer } from '@/lib/animations';
+import { Link } from 'react-router-dom';
+import { useTranslation } from '@/hooks/useTranslation';
+
+const MotionLink = motion.create(Link);
 
 export default function Index() {
   return (
@@ -57,6 +61,8 @@ export default function Index() {
  * Call to Action Section
  */
 function CTASection() {
+  const { t } = useTranslation();
+
   return (
     <section className="py-16 md:py-24 relative overflow-hidden">
       <div className="container mx-auto px-4">
@@ -99,7 +105,7 @@ function CTASection() {
               className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-5 py-2.5 mb-6"
             >
               <span className="text-lg">🚀</span>
-              <span className="text-white font-semibold text-sm">Start Your Health Journey</span>
+              <span className="text-white font-semibold text-sm">{t.hero.badge}</span>
             </motion.div>
 
             <motion.h2
@@ -108,7 +114,7 @@ function CTASection() {
               viewport={{ once: true }}
               className="font-display text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight"
             >
-              Your Health, Our Priority
+              {t.hero.title}
             </motion.h2>
 
             <motion.p
@@ -118,8 +124,7 @@ function CTASection() {
               transition={{ delay: 0.1 }}
               className="text-white/90 text-lg md:text-xl max-w-2xl mx-auto mb-10"
             >
-              Join thousands of users who trust NirogCare for AI-powered health guidance,
-              pharmacy locator, and wellness tracking - all in one place.
+              {t.hero.subtitle}
             </motion.p>
 
             <motion.div
@@ -129,30 +134,30 @@ function CTASection() {
               transition={{ delay: 0.2 }}
               className="flex flex-col sm:flex-row items-center justify-center gap-4"
             >
-              <motion.a
-                href="/dashboard"
+              <MotionLink
+                to="/dashboard"
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 className="bg-white text-primary font-bold px-8 py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all inline-flex items-center gap-2"
               >
-                <span>Get Started Free</span>
+                <span>{t.hero.getStarted}</span>
                 <motion.span
                   animate={{ x: [0, 5, 0] }}
                   transition={{ duration: 1, repeat: Infinity }}
                 >
                   →
                 </motion.span>
-              </motion.a>
+              </MotionLink>
 
-              <motion.a
-                href="/chat"
+              <MotionLink
+                to="/chat"
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 className="border-2 border-white text-white font-bold px-8 py-4 rounded-2xl bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all inline-flex items-center gap-2"
               >
                 <span>💬</span>
-                <span>Talk to AI</span>
-              </motion.a>
+                <span>{t.hero.aiHealthChat}</span>
+              </MotionLink>
             </motion.div>
 
             {/* Trust badges */}
@@ -164,10 +169,10 @@ function CTASection() {
               className="mt-12 flex flex-wrap items-center justify-center gap-6 text-white/70 text-sm"
             >
               <span className="flex items-center gap-2">
-                <span>🔒</span> Secure & Private
+                <span>🔒</span> {t.hero.freeSecure}
               </span>
               <span className="flex items-center gap-2">
-                <span>🆓</span> 100% Free
+                <span>🆓</span> {t.hero.aiAvailable}
               </span>
               <span className="flex items-center gap-2">
                 <span>🇮🇳</span> Made in India

@@ -1,0 +1,36 @@
+# Google Cloud Run Service Manifest (Region: asia-south1 Mumbai, minInstances: 1)
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: nirogcare-realtime-avatar
+  labels:
+    cloud.googleapis.com/location: asia-south1
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "10"
+        run.googleapis.com/cpu-throttling: "false"
+        run.googleapis.com/startup-cpu-boost: "true"
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 3600
+      containers:
+        - image: asia-south1-docker.pkg.dev/PROJECT_ID/nirogcare/realtime-avatar:latest
+          ports:
+            - name: http1
+              containerPort: 8080
+          env:
+            - name: K_SERVICE_REGION
+              value: "asia-south1"
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: gemini-api-key
+                  key: latest
+            - name: ELEVENLABS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: elevenlabs-api-key
+                  key: latest

@@ -1,8 +1,9 @@
 import { Language, MedicalStore, HealthService, HealthTip, GovtScheme, Reminder, CategoryType } from '@/types/health';
 
 export const languages: Language[] = [
-  { code: 'en', name: 'English', nativeName: 'English' },
+  { code: 'en', name: 'English', nativeName: 'English (Indian)' },
   { code: 'hi', name: 'Hindi', nativeName: 'हिंदी' },
+  { code: 'as', name: 'Assamese', nativeName: 'অসমীয়া' },
   { code: 'ta', name: 'Tamil', nativeName: 'தமிழ்' },
   { code: 'te', name: 'Telugu', nativeName: 'తెలుగు' },
   { code: 'kn', name: 'Kannada', nativeName: 'ಕನ್ನಡ' },

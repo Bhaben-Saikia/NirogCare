@@ -7,9 +7,11 @@ import { ArrowLeft, Lightbulb, Sparkles, Heart, MessageCircle, Search } from 'lu
 import { useNavigate, Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function HealthTips() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedTip, setExpandedTip] = useState<number | null>(null);
 
@@ -25,12 +27,12 @@ export default function HealthTips() {
         {/* Back button */}
         <motion.button
           initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
+          animate={{ opacity: 1, y: 0 }}
           onClick={() => navigate('/')}
           className="flex items-center gap-2 text-primary font-medium mb-6 hover:underline"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Home
+          {t.common.backToHome}
         </motion.button>
 
         {/* Hero Header */}
@@ -60,10 +62,10 @@ export default function HealthTips() {
             </motion.div>
             <div>
               <h1 className="font-display text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2">
-                Health Tips
+                {t.healthTips.title}
                 <Sparkles className="w-6 h-6 text-amber-300" />
               </h1>
-              <p className="text-white/80">Daily wellness advice for a healthier you</p>
+              <p className="text-white/80">{t.healthTips.subtitle}</p>
             </div>
           </div>
         </motion.div>
@@ -77,7 +79,7 @@ export default function HealthTips() {
         >
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search health tips..."
+            placeholder={t.healthTips.searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 rounded-xl border-border/50 h-12"
@@ -94,7 +96,7 @@ export default function HealthTips() {
           <Heart className="w-4 h-4 text-primary" />
           <span>
             <span className="font-semibold text-foreground">{filteredTips.length}</span>
-            {' '}health tips available
+            {' '}{t.healthTips.tipsFound}
           </span>
         </motion.div>
 

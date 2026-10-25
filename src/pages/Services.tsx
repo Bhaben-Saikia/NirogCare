@@ -1,13 +1,22 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
+import { useTranslation } from '@/hooks/useTranslation';
 import { servicesByCategory, categoryInfo } from '@/data/healthData';
 import Header from '@/components/layout/Header';
 import FloatingChatButton from '@/components/layout/FloatingChatButton';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChevronRight, Landmark, Lightbulb, Sparkles, Layers } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Landmark, Lightbulb, Sparkles, Layers, User, Users, Baby, Brain, type LucideIcon } from 'lucide-react';
+import { CategoryType } from '@/types/health';
+
+const categoryIcons: Record<string, LucideIcon> = { User, Users, Baby, Brain };
+const CategoryIcon = ({ name, className }: { name: string; className?: string }) => {
+  const Icon = categoryIcons[name] ?? Layers;
+  return <Icon className={className} />;
+};
 
 export default function Services() {
   const { selectedCategory, setSelectedCategory } = useAppContext();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   // If no category selected, show category selection
@@ -25,7 +34,7 @@ export default function Services() {
             className="flex items-center gap-2 text-primary font-medium mb-6 hover:underline"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Home
+            {t.common.backToHome}
           </motion.button>
 
           {/* Hero Header */}
@@ -55,43 +64,45 @@ export default function Services() {
               </motion.div>
               <div>
                 <h1 className="font-display text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2">
-                  Health Services
+                  {t.services.title}
                   <Sparkles className="w-6 h-6 text-amber-300" />
                 </h1>
-                <p className="text-white/80">Choose a category to explore services</p>
+                <p className="text-white/80">{t.services.subtitle}</p>
               </div>
             </div>
           </motion.div>
 
           {/* Category cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {categories.map(([type, info], index) => (
-              <motion.button
-                key={type}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                onClick={() => setSelectedCategory(type as any)}
-                className={`group relative overflow-hidden p-6 rounded-2xl bg-gradient-to-br ${info.gradient} text-white text-left shadow-lg hover:shadow-xl transition-all`}
-              >
-                {/* Background glow */}
-                <motion.div
-                  className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-xl"
-                  animate={{ scale: [1, 1.3, 1] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                />
-                
-                <motion.span 
-                  className="text-4xl block mb-3"
-                  whileHover={{ scale: 1.2, rotate: 10 }}
-                  transition={{ type: 'spring', stiffness: 300 }}
+            {categories.map(([type, info], index) => {
+              const translatedCat = t.categories[type as CategoryType] || info;
+              return (
+                <motion.button
+                  key={type}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  onClick={() => setSelectedCategory(type as any)}
+                  className={`group relative overflow-hidden p-6 rounded-2xl bg-gradient-to-br ${info.gradient} text-white text-left shadow-lg hover:shadow-xl transition-all`}
                 >
-                  {info.icon}
-                </motion.span>
-                <h3 className="font-display text-xl font-bold mb-1">{info.title}</h3>
-                <p className="text-white/80 text-sm">{info.subtitle}</p>
-                
-                <motion.div
+                  {/* Background glow */}
+                  <motion.div
+                    className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-xl"
+                    animate={{ scale: [1, 1.3, 1] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  />
+                  
+                  <motion.span 
+                    className="text-4xl block mb-3"
+                    whileHover={{ scale: 1.2, rotate: 10 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                  >
+                    <CategoryIcon name={info.iconComponent} className="w-10 h-10" />
+                  </motion.span>
+                  <h3 className="font-display text-xl font-bold mb-1">{translatedCat.title}</h3>
+                  <p className="text-white/80 text-sm">{translatedCat.subtitle}</p>
+                  
+                  <motion.div
                   className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
                   initial={{ x: -10 }}
                   whileHover={{ x: 0 }}
@@ -99,7 +110,8 @@ export default function Services() {
                   <ChevronRight className="w-6 h-6" />
                 </motion.div>
               </motion.button>
-            ))}
+              );
+            })}
           </div>
         </main>
         <FloatingChatButton />
@@ -145,7 +157,7 @@ export default function Services() {
               className="text-5xl md:text-6xl"
               whileHover={{ scale: 1.1, rotate: 10 }}
             >
-              {info.icon}
+              <CategoryIcon name={info.iconComponent} className="w-12 h-12 md:w-14 md:h-14" />
             </motion.span>
             <div>
               <h1 className="font-display text-2xl md:text-3xl font-bold mb-1 flex items-center gap-2">

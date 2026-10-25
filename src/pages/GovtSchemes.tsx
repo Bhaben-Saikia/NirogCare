@@ -7,9 +7,11 @@ import { ArrowLeft, CheckCircle2, Landmark, Sparkles, Search, ExternalLink, User
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function GovtSchemes() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedScheme, setExpandedScheme] = useState<number | null>(null);
 
@@ -30,7 +32,7 @@ export default function GovtSchemes() {
           className="flex items-center gap-2 text-primary font-medium mb-6 hover:underline"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Home
+          {t.common.backToHome}
         </motion.button>
 
         {/* Hero Header */}
@@ -60,10 +62,10 @@ export default function GovtSchemes() {
             </motion.div>
             <div>
               <h1 className="font-display text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2">
-                Government Schemes
+                {t.govtSchemes.title}
                 <Sparkles className="w-6 h-6 text-yellow-300" />
               </h1>
-              <p className="text-white/80">Healthcare benefits & insurance programs</p>
+              <p className="text-white/80">{t.govtSchemes.subtitle}</p>
             </div>
           </div>
         </motion.div>
@@ -77,7 +79,7 @@ export default function GovtSchemes() {
         >
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search schemes..."
+            placeholder={t.govtSchemes.searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 rounded-xl border-border/50 h-12"
@@ -94,7 +96,7 @@ export default function GovtSchemes() {
           <Users className="w-4 h-4 text-amber-500" />
           <span>
             <span className="font-semibold text-foreground">{filteredSchemes.length}</span>
-            {' '}government schemes
+            {' '}{t.govtSchemes.schemesAvailable}
           </span>
         </motion.div>
 

@@ -1,40 +1,26 @@
 {
   "name": "nirogcare",
-  "private": false,
+  "private": true,
   "version": "1.0.0",
-  "description": "Comprehensive healthcare platform with AI-powered health analysis, family management, and wearable integration",
   "type": "module",
-  "keywords": [
-    "healthcare",
-    "medical",
-    "health-monitoring",
-    "symptom-checker",
-    "family-health",
-    "wearable-integration",
-    "react",
-    "typescript",
-    "healthcare-platform"
-  ],
-  "author": "NirogCare Team",
-  "license": "MIT",
-  "homepage": "https://github.com/nirogcare/nirogcare#readme",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/nirogcare/nirogcare.git"
-  },
-  "bugs": {
-    "url": "https://github.com/nirogcare/nirogcare/issues"
-  },
   "scripts": {
     "dev": "vite",
+    "start:prod": "npx tsx src/server/cloudRunServer.ts",
     "build": "vite build",
     "build:dev": "vite build --mode development",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "preview": "vite preview",
-    "type-check": "tsc --noEmit",
-    "test": "npm run lint && npm run type-check",
-    "prepare": "npm run build"
+    "test:unit": "npx tsx scripts/pipeline.test.ts",
+    "test:integration": "npx tsx scripts/integration.test.ts",
+    "test:tdd": "npx tsx scripts/tdd.test.ts",
+    "test:pentest": "npx tsx scripts/pentest.test.ts",
+    "test:simulation": "npx tsx scripts/userSimulation.test.ts",
+    "test:smoke": "npx tsx scripts/smoke.ts",
+    "test:latency": "npx tsx scripts/latencyHarness.ts",
+    "evals": "npx tsx scripts/evals.ts",
+    "test": "npx tsx scripts/pipeline.test.ts",
+    "verify:all": "npm run typecheck && npm run test:unit && npm run test:smoke && npm run evals"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -65,9 +51,11 @@
     "@radix-ui/react-toggle": "^1.1.9",
     "@radix-ui/react-toggle-group": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.7",
+    "@react-three/fiber": "^8.17.10",
     "@supabase/supabase-js": "^2.90.0",
     "@tanstack/react-query": "^5.83.0",
     "@types/leaflet": "^1.9.21",
+    "@types/three": "^0.169.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -90,6 +78,7 @@
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "three": "^0.169.0",
     "vaul": "^0.9.9",
     "zod": "^3.25.76",
     "zustand": "^5.0.10"

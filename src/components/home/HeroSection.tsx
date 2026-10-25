@@ -217,14 +217,14 @@ export default function HeroSection() {
             </motion.h1>
           </motion.div>
 
-          {/* Subtitle - Short & Smart */}
+          {/* Subtitle - Translated dynamically */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="text-lg md:text-xl lg:text-2xl text-white/90 max-w-lg mx-auto mb-12 leading-relaxed"
+            className="text-lg md:text-xl lg:text-2xl text-white/90 max-w-2xl mx-auto mb-12 leading-relaxed"
           >
-            Scan prescriptions. Get health insights. <span className="text-yellow-300 font-semibold">Stay informed.</span>
+            {t.hero.subtitle}
           </motion.p>
 
           {/* CTAs with enhanced animations */}
@@ -287,7 +287,7 @@ export default function HeroSection() {
             {[
               { icon: Shield, value: '100%', label: t.hero.freeSecure },
               { icon: Clock, value: '24/7', label: t.hero.aiAvailable },
-              { icon: Users, value: '6+', label: t.hero.languages },
+              { icon: Users, value: '9+', label: t.hero.languages },
             ].map((stat, idx) => (
               <motion.div
                 key={stat.label}

@@ -9,15 +9,15 @@ import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 
-// Firebase configuration from Firebase Console
+// Firebase configuration (loaded from environment variables — see .env.example)
 const firebaseConfig = {
-    apiKey: "AIzaSyA9vkhCCiZl60rHCCZ3dqAJKm4SLKRq8nE",
-    authDomain: "nirogcare-9a3ac.firebaseapp.com",
-    projectId: "nirogcare-9a3ac",
-    storageBucket: "nirogcare-9a3ac.firebasestorage.app",
-    messagingSenderId: "559615363260",
-    appId: "1:559615363260:web:7a4f45ae82182a30df28b9",
-    measurementId: "G-W35ZJHBDDL"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase

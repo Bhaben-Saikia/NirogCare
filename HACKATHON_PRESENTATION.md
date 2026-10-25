@@ -9,7 +9,7 @@
 **NirogCare - निरोग केयर**
 *"Making Quality Healthcare Accessible to Every Indian"*
 
-- Team: [Vim]
+- Team: [Your Team Name]
 - Location: Itanagar, Nirjuli, Arunachal Pradesh
 - Contact: bhabens170@gmail.com | +91 6000580631
 

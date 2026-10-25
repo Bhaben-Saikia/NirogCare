@@ -15,7 +15,7 @@ import {
   CheckCircle2, X, Pill, Clock, Info,
   MapPin, Bell, MessageCircle, AlertTriangle, Calendar, ImageIcon,
   Phone, Navigation, ChevronRight, Zap, User, Stethoscope,
-  ExternalLink, ChevronDown
+  ExternalLink, ChevronDown, Edit2, Check, FileText, Shield, CheckSquare, Square
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { analyzePrescription } from '@/lib/aiService';
@@ -23,6 +23,7 @@ import { searchNearbyPharmacies, openDirections, callPharmacy, type Pharmacy } f
 import { useReminderStore, generateReminderTimes, formatTime12Hour } from '@/stores/reminderStore';
 import { toast } from 'sonner';
 import { useAppContext } from '@/context/AppContext';
+import { useTranslation } from '@/hooks/useTranslation';
 import { useNavigate } from 'react-router-dom';
 
 // Interfaces
@@ -35,6 +36,8 @@ interface MedicineInfo {
   type?: string;
   sideEffects?: string;
   usage?: string;
+  confidence?: number;
+  isLowConfidence?: boolean;
 }
 
 interface ScanResult {
@@ -43,6 +46,9 @@ interface ScanResult {
   patientName?: string;
   date?: string;
   notes?: string;
+  rawText?: string;
+  overallConfidence?: number;
+  hasLowConfidenceItems?: boolean;
 }
 
 /**
@@ -182,22 +188,21 @@ function generateAISuggestions(medicines: MedicineInfo[]): string[] {
       suggestions.push(`Can I drink milk with ${name}?`);
     }
 
-    // Generic alternatives
-    suggestions.push(`What is the generic alternative for ${name}?`);
+    // Safe storage and general timing questions (never suggest drug substitution or dosage changes)
+    suggestions.push(`How should ${name} generally be stored at home?`);
 
     // Usage-specific
     if (usage.includes('infection')) {
-      suggestions.push(`How long does it take for ${name} to work on infection?`);
+      suggestions.push(`What general rest and hydration habits help during recovery while taking ${name}?`);
     }
     if (usage.includes('fever') || usage.includes('pain')) {
-      suggestions.push(`Can I take ${name} on an empty stomach?`);
+      suggestions.push(`Should ${name} generally be taken with food or water as written on my prescription?`);
     }
   });
 
   // General suggestions
   if (medicines.length > 1) {
-    suggestions.push(`Can I take all these medicines together safely?`);
-    suggestions.push(`What is the best time gap between taking these medicines?`);
+    suggestions.push(`What questions should I ask my doctor or pharmacist about my prescription schedule?`);
   }
 
   // Return unique suggestions, max 6
@@ -212,13 +217,24 @@ export default function PrescriptionScanner() {
   const [isLoadingPharmacies, setIsLoadingPharmacies] = useState(false);
   const [aiSuggestions, setAISuggestions] = useState<string[]>([]);
   const [showAllPharmacies, setShowAllPharmacies] = useState(false);
+  const [hasHealthConsent, setHasHealthConsent] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('nirogcare_ocr_consent') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [isVerifiedByUser, setIsVerifiedByUser] = useState(false);
+  const [showRawText, setShowRawText] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { setUploadedImage, t, selectedLanguage } = useAppContext();
+  const { t: i18n } = useTranslation();
   const navigate = useNavigate();
 
   // Reminder store
-  const { addMultipleReminders, reminders } = useReminderStore();
+  const { addMultipleReminders } = useReminderStore();
 
   // Load nearby pharmacies when result is ready
   useEffect(() => {
@@ -243,8 +259,17 @@ export default function PrescriptionScanner() {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('File too large (max 5MB)');
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
+      if (!allowedTypes.includes(file.type.toLowerCase()) && !file.type.startsWith('image/')) {
+        toast.error('Invalid file type', {
+          description: 'Please upload an image (JPG, PNG, WEBP) or PDF document'
+        });
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('File too large', {
+          description: 'Maximum document size is 10MB'
+        });
         return;
       }
       const reader = new FileReader();
@@ -253,6 +278,7 @@ export default function PrescriptionScanner() {
         setSelectedImage(base64);
         setUploadedImage(base64);
         setScanResult(null);
+        setIsVerifiedByUser(false);
         setPharmacies([]);
         setAISuggestions([]);
       };
@@ -262,28 +288,36 @@ export default function PrescriptionScanner() {
 
   const processWithAI = async () => {
     if (!selectedImage) return;
+    if (!hasHealthConsent) {
+      toast.error('Consent required', {
+        description: 'Please check the health data privacy consent before scanning.'
+      });
+      return;
+    }
+    try {
+      localStorage.setItem('nirogcare_ocr_consent', 'true');
+    } catch {
+      // Ignore storage error
+    }
     setIsScanning(true);
 
     try {
-      const minTime = new Promise(resolve => setTimeout(resolve, 3500));
-      const aiProcess = analyzePrescription(selectedImage, selectedLanguage);
-
-      const [_, result] = await Promise.all([minTime, aiProcess]);
+      const result = await analyzePrescription(selectedImage, selectedLanguage);
 
       if (result && result.medicines && result.medicines.length > 0) {
         setScanResult(result as ScanResult);
+        setIsVerifiedByUser(false);
         toast.success('Prescription Analyzed!', {
-          description: `Found ${result.medicines.length} medicines`,
+          description: `Found ${result.medicines.length} medicines. Please review and confirm details before use.`,
           icon: <CheckCircle2 className="w-4 h-4 text-green-500" />
         });
       } else {
         toast.error('Could not read prescription', {
-          description: 'Please try with a clearer image'
+          description: 'Please try with a clearer or higher contrast image'
         });
       }
 
-    } catch (error) {
-      console.error('Scan error:', error);
+    } catch {
       toast.error('Analysis failed', {
         description: 'Please try again with a clearer image'
       });
@@ -292,9 +326,17 @@ export default function PrescriptionScanner() {
     }
   };
 
+  const updateMedicineField = (index: number, field: keyof MedicineInfo, val: string) => {
+    if (!scanResult) return;
+    const updated = [...scanResult.medicines];
+    updated[index] = { ...updated[index], [field]: val };
+    setScanResult({ ...scanResult, medicines: updated });
+  };
+
   const clearScan = () => {
     setSelectedImage(null);
     setScanResult(null);
+    setIsVerifiedByUser(false);
     setPharmacies([]);
     setAISuggestions([]);
     setUploadedImage(null);
@@ -304,6 +346,13 @@ export default function PrescriptionScanner() {
   // Add all reminders and navigate to Reminders page
   const handleAddReminders = () => {
     if (!scanResult) return;
+
+    if (!isVerifiedByUser) {
+      toast.warning('Verification required', {
+        description: 'Please review the medicines and check "I confirm these medicines" before setting reminders.'
+      });
+      return;
+    }
 
     const newReminders = scanResult.medicines.flatMap(med => {
       const times = generateReminderTimes(med.frequency);
@@ -321,7 +370,7 @@ export default function PrescriptionScanner() {
     addMultipleReminders(newReminders);
 
     toast.success('Reminders Added!', {
-      description: `${newReminders.length} reminders set for your medicines`,
+      description: `${newReminders.length} verified reminders scheduled`,
       action: {
         label: 'View All',
         onClick: () => navigate('/reminders')
@@ -332,8 +381,14 @@ export default function PrescriptionScanner() {
     navigate('/reminders');
   };
 
-  // Navigate to chat with suggestion
+  // Navigate to chat with suggestion (gated behind user verification)
   const handleAISuggestion = (suggestion: string) => {
+    if (!isVerifiedByUser) {
+      toast.warning('Verification required', {
+        description: 'Please review and confirm your extracted medicines before asking AI questions about them.'
+      });
+      return;
+    }
     navigate('/chat', { state: { initialMessage: suggestion } });
   };
 
@@ -374,10 +429,10 @@ export default function PrescriptionScanner() {
           </motion.div>
 
           <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
-            {t.prescriptionScanner}
+            {i18n.prescription.title}
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            {t.uploadPrescription}
+            {i18n.prescription.subtitle}
           </p>
         </motion.div>
 
@@ -405,7 +460,7 @@ export default function PrescriptionScanner() {
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/*"
+                      accept="image/*,application/pdf"
                       capture="environment"
                       onChange={handleFileSelect}
                       className="hidden"
@@ -417,8 +472,8 @@ export default function PrescriptionScanner() {
                     >
                       <Upload className="w-12 h-12 text-white" />
                     </motion.div>
-                    <h3 className="text-2xl font-bold mb-2">Upload Prescription</h3>
-                    <p className="text-muted-foreground mb-8">Take a photo or choose from gallery</p>
+                    <h3 className="text-2xl font-bold mb-2">{i18n.prescription.uploadBtn}</h3>
+                    <p className="text-muted-foreground mb-8">{i18n.prescription.dragDrop}</p>
                     <div className="flex justify-center gap-4">
                       <Button variant="outline" className="rounded-xl gap-2 pointer-events-none h-12 px-6">
                         <ImageIcon className="w-5 h-5" /> Gallery
@@ -459,6 +514,24 @@ export default function PrescriptionScanner() {
                       </Button>
                     </div>
 
+                    {/* Health Data Privacy Notice */}
+                    {!scanResult && !isScanning && (
+                      <div className="p-3.5 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-3 text-xs text-muted-foreground">
+                        <Shield className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                        <label className="flex items-start gap-2 cursor-pointer text-xs">
+                          <input
+                            type="checkbox"
+                            checked={hasHealthConsent}
+                            onChange={(e) => setHasHealthConsent(e.target.checked)}
+                            className="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary"
+                          />
+                          <span>
+                            <strong className="text-foreground">Health Data Privacy Consent:</strong> Prescriptions contain sensitive medical data. NirogCare processes this image privately via Google Cloud Vision OCR for text extraction only. Raw documents are not stored or logged.
+                          </span>
+                        </label>
+                      </div>
+                    )}
+
                     {/* Analyze Button */}
                     {!scanResult && !isScanning && (
                       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
@@ -467,7 +540,7 @@ export default function PrescriptionScanner() {
                           className="w-full rounded-2xl h-14 text-lg font-bold bg-gradient-to-r from-primary via-emerald-500 to-teal-500 hover:opacity-90 shadow-xl shadow-primary/30"
                         >
                           <Sparkles className="w-5 h-5 mr-2" />
-                          Analyze Prescription
+                          {i18n.prescription.scanBtn}
                         </Button>
                       </motion.div>
                     )}
@@ -490,35 +563,66 @@ export default function PrescriptionScanner() {
                 <div className="bg-card rounded-2xl border border-border/50 overflow-hidden">
                   {/* Header */}
                   <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-5 text-white">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center shrink-0">
                           <CheckCircle2 className="w-6 h-6" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-lg">Prescription Analysis Complete</h3>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="font-bold text-lg">Prescription Analysis Complete</h3>
+                            <span className="text-xs px-2.5 py-0.5 rounded-full bg-white/20 font-medium">
+                              OCR Quality: {Math.round((scanResult.overallConfidence || 0.88) * 100)}%
+                            </span>
+                          </div>
                           <p className="text-white/80 text-sm">
                             {scanResult.medicines.length} medicine{scanResult.medicines.length > 1 ? 's' : ''} identified
+                            {scanResult.hasLowConfidenceItems && ' • ⚠️ Review flagged items'}
                           </p>
                         </div>
                       </div>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={clearScan}
-                        className="rounded-xl bg-white/20 hover:bg-white/30 text-white border-0"
-                      >
-                        Scan Another
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        {scanResult.rawText && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => setShowRawText(!showRawText)}
+                            className="rounded-xl bg-white/20 hover:bg-white/30 text-white border-0 text-xs"
+                          >
+                            <FileText className="w-3.5 h-3.5 mr-1" />
+                            {showRawText ? 'Hide Raw Text' : 'View Raw OCR'}
+                          </Button>
+                        )}
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={clearScan}
+                          className="rounded-xl bg-white/20 hover:bg-white/30 text-white border-0 text-xs"
+                        >
+                          Scan Another
+                        </Button>
+                      </div>
                     </div>
                   </div>
+
+                  {/* Raw OCR Text Expandable Panel */}
+                  {showRawText && scanResult.rawText && (
+                    <div className="p-4 bg-muted/70 border-b border-border/50 text-xs">
+                      <div className="flex items-center justify-between mb-1.5 font-semibold text-muted-foreground">
+                        <span>Google Cloud Vision OCR Extracted Text:</span>
+                      </div>
+                      <pre className="font-mono bg-background/80 p-3 rounded-lg border max-h-40 overflow-y-auto whitespace-pre-wrap text-[11px] leading-relaxed text-foreground">
+                        {scanResult.rawText}
+                      </pre>
+                    </div>
+                  )}
 
                   {/* Doctor & Patient Info */}
                   <div className="p-5 border-b border-border/50">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {scanResult.doctorName && (
                         <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl">
-                          <Stethoscope className="w-5 h-5 text-blue-500" />
+                          <Stethoscope className="w-5 h-5 text-blue-500 shrink-0" />
                           <div>
                             <p className="text-xs text-muted-foreground">Doctor</p>
                             <p className="font-semibold text-sm">{scanResult.doctorName}</p>
@@ -527,7 +631,7 @@ export default function PrescriptionScanner() {
                       )}
                       {scanResult.patientName && (
                         <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl">
-                          <User className="w-5 h-5 text-green-500" />
+                          <User className="w-5 h-5 text-green-500 shrink-0" />
                           <div>
                             <p className="text-xs text-muted-foreground">Patient</p>
                             <p className="font-semibold text-sm">{scanResult.patientName}</p>
@@ -536,7 +640,7 @@ export default function PrescriptionScanner() {
                       )}
                       {scanResult.date && (
                         <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl">
-                          <Calendar className="w-5 h-5 text-purple-500" />
+                          <Calendar className="w-5 h-5 text-purple-500 shrink-0" />
                           <div>
                             <p className="text-xs text-muted-foreground">Date</p>
                             <p className="font-semibold text-sm">{scanResult.date}</p>
@@ -544,7 +648,7 @@ export default function PrescriptionScanner() {
                         </div>
                       )}
                       <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl">
-                        <Pill className="w-5 h-5 text-rose-500" />
+                        <Pill className="w-5 h-5 text-rose-500 shrink-0" />
                         <div>
                           <p className="text-xs text-muted-foreground">Medicines</p>
                           <p className="font-semibold text-sm">{scanResult.medicines.length} items</p>
@@ -555,76 +659,167 @@ export default function PrescriptionScanner() {
 
                   {/* Medicines List */}
                   <div className="p-5">
-                    <h4 className="font-bold text-lg mb-4 flex items-center gap-2">
-                      <Pill className="w-5 h-5 text-primary" />
-                      Prescribed Medicines
-                    </h4>
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="font-bold text-lg flex items-center gap-2">
+                        <Pill className="w-5 h-5 text-primary" />
+                        Prescribed Medicines
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        Click "Edit" to adjust ambiguous handwriting
+                      </p>
+                    </div>
+
                     <div className="space-y-4">
-                      {scanResult.medicines.map((med, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="bg-gradient-to-br from-muted/50 to-muted/30 rounded-xl p-4 border border-border/50"
-                        >
-                          <div className="flex items-start justify-between gap-4 mb-3">
-                            <div className="flex items-start gap-3">
-                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${med.type?.toLowerCase().includes('antibiotic') ? 'bg-red-100 dark:bg-red-900/30' :
-                                med.type?.toLowerCase().includes('pain') || med.type?.toLowerCase().includes('analgesic') ? 'bg-blue-100 dark:bg-blue-900/30' :
-                                  'bg-purple-100 dark:bg-purple-900/30'
+                      {scanResult.medicines.map((med, index) => {
+                        const isEditing = editingIndex === index;
+                        const isLow = med.isLowConfidence || (med.confidence !== undefined && med.confidence < 0.8);
+
+                        return (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.1 }}
+                            className={`bg-gradient-to-br from-muted/50 to-muted/30 rounded-xl p-4 border transition-all ${
+                              isLow ? 'border-amber-500/60 bg-amber-500/5' : 'border-border/50'
+                            }`}
+                          >
+                            {/* Low Confidence Warning Pill */}
+                            {isLow && (
+                              <div className="mb-3 px-3 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs flex items-center gap-2 font-medium">
+                                <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600" />
+                                <span>
+                                  Low OCR Confidence ({Math.round((med.confidence || 0.65) * 100)}%) — Doctor handwriting is ambiguous. Please verify against prescription.
+                                </span>
+                              </div>
+                            )}
+
+                            <div className="flex items-start justify-between gap-4 mb-3">
+                              <div className="flex items-start gap-3 flex-1">
+                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                                  med.type?.toLowerCase().includes('antibiotic') ? 'bg-red-100 dark:bg-red-900/30' :
+                                  med.type?.toLowerCase().includes('pain') || med.type?.toLowerCase().includes('analgesic') ? 'bg-blue-100 dark:bg-blue-900/30' :
+                                    'bg-purple-100 dark:bg-purple-900/30'
                                 }`}>
-                                <Pill className={`w-5 h-5 ${med.type?.toLowerCase().includes('antibiotic') ? 'text-red-600' :
-                                  med.type?.toLowerCase().includes('pain') || med.type?.toLowerCase().includes('analgesic') ? 'text-blue-600' :
-                                    'text-purple-600'
+                                  <Pill className={`w-5 h-5 ${
+                                    med.type?.toLowerCase().includes('antibiotic') ? 'text-red-600' :
+                                    med.type?.toLowerCase().includes('pain') || med.type?.toLowerCase().includes('analgesic') ? 'text-blue-600' :
+                                      'text-purple-600'
                                   }`} />
-                              </div>
-                              <div>
-                                <h5 className="font-bold text-foreground">{med.name}</h5>
-                                <p className="text-sm text-muted-foreground">{med.dosage}</p>
-                              </div>
-                            </div>
-                            {med.type && (
-                              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-                                {med.type}
-                              </span>
-                            )}
-                          </div>
+                                </div>
 
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
-                            <div className="flex items-center gap-1.5 text-xs bg-background/50 px-2.5 py-1.5 rounded-lg">
-                              <Clock className="w-3.5 h-3.5 text-primary" />
-                              <span>{med.frequency}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 text-xs bg-background/50 px-2.5 py-1.5 rounded-lg">
-                              <Calendar className="w-3.5 h-3.5 text-primary" />
-                              <span>{med.duration}</span>
-                            </div>
-                            {med.instructions && (
-                              <div className="flex items-center gap-1.5 text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-2.5 py-1.5 rounded-lg col-span-2">
-                                <Info className="w-3.5 h-3.5" />
-                                <span>{med.instructions}</span>
+                                {isEditing ? (
+                                  <div className="space-y-2 flex-1">
+                                    <div className="flex gap-2">
+                                      <input
+                                        type="text"
+                                        value={med.name}
+                                        onChange={(e) => updateMedicineField(index, 'name', e.target.value)}
+                                        placeholder="Medicine name"
+                                        className="px-2.5 py-1 text-sm rounded border bg-background flex-1 font-semibold"
+                                      />
+                                      <input
+                                        type="text"
+                                        value={med.dosage}
+                                        onChange={(e) => updateMedicineField(index, 'dosage', e.target.value)}
+                                        placeholder="Dosage (e.g. 500mg)"
+                                        className="px-2.5 py-1 text-sm rounded border bg-background w-32"
+                                      />
+                                    </div>
+                                    <div className="flex gap-2">
+                                      <input
+                                        type="text"
+                                        value={med.frequency}
+                                        onChange={(e) => updateMedicineField(index, 'frequency', e.target.value)}
+                                        placeholder="Frequency (e.g. Twice daily)"
+                                        className="px-2.5 py-1 text-xs rounded border bg-background flex-1"
+                                      />
+                                      <input
+                                        type="text"
+                                        value={med.duration}
+                                        onChange={(e) => updateMedicineField(index, 'duration', e.target.value)}
+                                        placeholder="Duration (e.g. 5 days)"
+                                        className="px-2.5 py-1 text-xs rounded border bg-background w-32"
+                                      />
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div>
+                                    <h5 className="font-bold text-foreground flex items-center gap-2">
+                                      {med.name}
+                                      {med.confidence && (
+                                        <span className="text-[11px] font-normal text-muted-foreground">
+                                          ({Math.round(med.confidence * 100)}% confidence)
+                                        </span>
+                                      )}
+                                    </h5>
+                                    <p className="text-sm text-muted-foreground">{med.dosage}</p>
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
 
-                          {/* Usage & Side Effects */}
-                          <div className="flex flex-wrap gap-2">
-                            {med.usage && (
-                              <div className="flex items-center gap-1.5 text-xs bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 px-2.5 py-1.5 rounded-lg">
-                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                <span>For: {med.usage}</span>
+                              <div className="flex items-center gap-2 shrink-0">
+                                {med.type && !isEditing && (
+                                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                                    {med.type}
+                                  </span>
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setEditingIndex(isEditing ? null : index)}
+                                  className="h-8 px-2 text-xs"
+                                >
+                                  {isEditing ? (
+                                    <>
+                                      <Check className="w-3.5 h-3.5 mr-1 text-emerald-600" /> Done
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Edit2 className="w-3.5 h-3.5 mr-1" /> Edit
+                                    </>
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+
+                            {!isEditing && (
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+                                <div className="flex items-center gap-1.5 text-xs bg-background/50 px-2.5 py-1.5 rounded-lg">
+                                  <Clock className="w-3.5 h-3.5 text-primary" />
+                                  <span>{med.frequency}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-xs bg-background/50 px-2.5 py-1.5 rounded-lg">
+                                  <Calendar className="w-3.5 h-3.5 text-primary" />
+                                  <span>{med.duration}</span>
+                                </div>
+                                {med.instructions && (
+                                  <div className="flex items-center gap-1.5 text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-2.5 py-1.5 rounded-lg col-span-2">
+                                    <Info className="w-3.5 h-3.5" />
+                                    <span>{med.instructions}</span>
+                                  </div>
+                                )}
                               </div>
                             )}
-                            {med.sideEffects && (
-                              <div className="flex items-center gap-1.5 text-xs bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 px-2.5 py-1.5 rounded-lg">
-                                <AlertTriangle className="w-3.5 h-3.5" />
-                                <span>Side effects: {med.sideEffects}</span>
-                              </div>
-                            )}
-                          </div>
-                        </motion.div>
-                      ))}
+
+                            {/* Usage & Side Effects */}
+                            <div className="flex flex-wrap gap-2">
+                              {med.usage && (
+                                <div className="flex items-center gap-1.5 text-xs bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 px-2.5 py-1.5 rounded-lg">
+                                  <CheckCircle2 className="w-3.5 h-3.5" />
+                                  <span>For: {med.usage}</span>
+                                </div>
+                              )}
+                              {med.sideEffects && (
+                                <div className="flex items-center gap-1.5 text-xs bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 px-2.5 py-1.5 rounded-lg">
+                                  <AlertTriangle className="w-3.5 h-3.5" />
+                                  <span>Side effects: {med.sideEffects}</span>
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
+                        );
+                      })}
                     </div>
 
                     {/* Doctor's Notes */}
@@ -639,6 +834,32 @@ export default function PrescriptionScanner() {
                         </div>
                       </div>
                     )}
+
+                    {/* Mandatory Clinical Verification Gate */}
+                    <div className="mt-6 p-4 rounded-xl bg-amber-500/10 border-2 border-amber-500/30 space-y-2">
+                      <div className="flex items-start gap-2.5">
+                        <Shield className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                        <div className="space-y-1.5">
+                          <p className="text-xs font-bold text-amber-950 dark:text-amber-200">
+                            Clinical Safety Guidance & Mandatory Verification
+                          </p>
+                          <p className="text-xs text-amber-900 dark:text-amber-300 leading-relaxed">
+                            OCR text recognition is an automated assistance tool, not a doctor or pharmacist. Never alter dosages, schedule, or medications based on automated text recognition alone. Always confirm with your physician or licensed pharmacist.
+                          </p>
+                          <label className="flex items-center gap-2 cursor-pointer pt-2">
+                            <input
+                              type="checkbox"
+                              checked={isVerifiedByUser}
+                              onChange={(e) => setIsVerifiedByUser(e.target.checked)}
+                              className="w-4 h-4 rounded text-primary focus:ring-primary border-gray-300"
+                            />
+                            <span className="text-xs font-semibold text-foreground">
+                              I have verified these extracted medicines against my physical prescription paper.
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 

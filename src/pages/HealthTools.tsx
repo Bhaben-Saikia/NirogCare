@@ -4,7 +4,7 @@
  * calories, meditation, eye care, period tracker, and symptom checker
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Header from '@/components/layout/Header';
 import FloatingChatButton from '@/components/layout/FloatingChatButton';
@@ -174,6 +174,20 @@ function MeditationTimer() {
   const [isRunning, setIsRunning] = useState(false);
   const [timeLeft, setTimeLeft] = useState(5 * 60);
 
+  useEffect(() => {
+    if (!isRunning) return;
+    const id = setInterval(() => {
+      setTimeLeft((t) => {
+        if (t <= 1) {
+          setIsRunning(false);
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [isRunning]);
+
   const sessions = [
     { name: 'Quick Calm', duration: 3, icon: '🧘' },
     { name: 'Stress Relief', duration: 5, icon: '😌' },
@@ -194,7 +208,9 @@ function MeditationTimer() {
         <p className="text-4xl font-bold text-foreground">
           {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
         </p>
-        <p className="text-muted-foreground mt-2">{isRunning ? 'Breathe deeply...' : 'Ready to meditate'}</p>
+        <p className="text-muted-foreground mt-2">
+          {isRunning ? 'Breathe deeply...' : timeLeft === 0 ? 'Session complete 🙏' : 'Ready to meditate'}
+        </p>
       </div>
 
       <div className="grid grid-cols-2 gap-2">
@@ -204,6 +220,7 @@ function MeditationTimer() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => {
+              setIsRunning(false);
               setMinutes(session.duration);
               setTimeLeft(session.duration * 60);
             }}
@@ -219,13 +236,28 @@ function MeditationTimer() {
         ))}
       </div>
 
-      <Button
-        onClick={() => setIsRunning(!isRunning)}
-        className="w-full rounded-xl h-12 gradient-hero"
-      >
-        <Timer className="w-5 h-5 mr-2" />
-        {isRunning ? 'Pause' : 'Start Meditation'}
-      </Button>
+      <div className="flex gap-2">
+        <Button
+          onClick={() => {
+            if (timeLeft === 0) setTimeLeft(minutes * 60);
+            setIsRunning(!isRunning);
+          }}
+          className="flex-1 rounded-xl h-12 gradient-hero"
+        >
+          <Timer className="w-5 h-5 mr-2" />
+          {isRunning ? 'Pause' : timeLeft === 0 ? 'Restart' : 'Start Meditation'}
+        </Button>
+        <Button
+          variant="outline"
+          className="rounded-xl h-12"
+          onClick={() => {
+            setIsRunning(false);
+            setTimeLeft(minutes * 60);
+          }}
+        >
+          Reset
+        </Button>
+      </div>
     </div>
   );
 }
@@ -283,8 +315,18 @@ function EyeCareTracker() {
 
 // Period Tracker Component
 function PeriodTracker() {
-  const [lastPeriod, setLastPeriod] = useState('2026-01-15');
-  const [cycleLength, setCycleLength] = useState(28);
+  const todayISO = () => new Date().toISOString().split('T')[0];
+  const [lastPeriod, setLastPeriod] = useState<string>(
+    () => localStorage.getItem('nirogcare_last_period') || todayISO()
+  );
+  const [cycleLength, setCycleLength] = useState<number>(
+    () => parseInt(localStorage.getItem('nirogcare_cycle_length') || '28') || 28
+  );
+
+  useEffect(() => {
+    localStorage.setItem('nirogcare_last_period', lastPeriod);
+    localStorage.setItem('nirogcare_cycle_length', String(cycleLength));
+  }, [lastPeriod, cycleLength]);
 
   const calculateNextPeriod = () => {
     const lastDate = new Date(lastPeriod);
@@ -354,9 +396,9 @@ function PeriodTracker() {
         </div>
       </div>
 
-      <Button className="w-full rounded-xl h-12 gradient-hero">
+      <Button className="w-full rounded-xl h-12 gradient-hero" onClick={() => setLastPeriod(todayISO())}>
         <Calendar className="w-5 h-5 mr-2" />
-        Log Period
+        Log Period Started Today
       </Button>
     </div>
   );

@@ -101,6 +101,21 @@ export default function PrescriptionResult() {
               </p>
             </div>
 
+            {/* Clinical Safety Disclaimer */}
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-xs font-bold text-amber-900 dark:text-amber-300">
+                  चिकित्सीय चेतावनी / Clinical Safety Warning:
+                </p>
+                <p className="text-xs text-amber-800 dark:text-amber-200">
+                  यह विवरण स्वचालित OCR द्वारा पढ़ा गया है। दवा की खुराक, अवधि या विकल्प बदलने से पहले हमेशा अपने डॉक्टर या फार्मासिस्ट से पुष्टि करें।
+                  <br />
+                  <em>Always confirm dosage and medicines with your doctor or pharmacist before consumption.</em>
+                </p>
+              </div>
+            </div>
+
             {/* Find Stores Button */}
             <Link to="/nearby-stores">
               <Button className="w-full gradient-hero rounded-2xl h-14 text-lg">

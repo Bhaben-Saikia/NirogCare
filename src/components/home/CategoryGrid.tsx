@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { categoryInfo } from '@/data/healthData';
 import { CategoryType } from '@/types/health';
 import { useAppContext } from '@/context/AppContext';
+import { useTranslation } from '@/hooks/useTranslation';
 import { ChevronRight, Sparkles, Star, User, Users, Baby, Brain } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
@@ -69,7 +70,7 @@ const item = {
       damping: 12
     }
   }
-};  
+};
 
 interface CategoryCardProps {
   type: CategoryType;
@@ -79,7 +80,8 @@ interface CategoryCardProps {
 }
 
 function CategoryCard({ type, gradient, shadow, onClick }: CategoryCardProps) {
-  const info = categoryInfo[type];
+  const { t } = useTranslation();
+  const info = t.categories[type] || categoryInfo[type];
   const [isHovered, setIsHovered] = useState(false);
   const IconComponent = iconMap[type];
 
@@ -174,7 +176,7 @@ function CategoryCard({ type, gradient, shadow, onClick }: CategoryCardProps) {
             animate={isHovered ? { x: 10 } : { x: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <span>Explore Now</span>
+            <span>{t.common.explore}</span>
             <motion.div
               animate={isHovered ? { x: [0, 5, 0] } : { x: 0 }}
               transition={{ duration: 0.5, repeat: isHovered ? Infinity : 0 }}
@@ -197,7 +199,8 @@ function CategoryCard({ type, gradient, shadow, onClick }: CategoryCardProps) {
 }
 
 export default function CategoryGrid() {
-  const { setSelectedCategory, t } = useAppContext();
+  const { setSelectedCategory } = useAppContext();
+  const { t } = useTranslation();
 
   return (
     <section className="py-16 md:py-24 relative overflow-hidden">
@@ -236,15 +239,14 @@ export default function CategoryGrid() {
             >
               <Sparkles className="w-4 h-4 text-primary" />
             </motion.div>
-            <span className="text-primary font-semibold text-sm">{t.services}</span>
+            <span className="text-primary font-semibold text-sm">{t.header.services}</span>
           </motion.div>
 
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            Choose Your{' '}
-            <span className="text-gradient">Health Category</span>
+            {t.categories.title}
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Personalized health guidance tailored to your specific needs
+            {t.categories.subtitle}
           </p>
         </motion.div>
 

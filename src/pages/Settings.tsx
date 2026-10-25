@@ -185,7 +185,7 @@ export default function Settings() {
                   <h3 className="font-semibold">{profile?.personalInfo?.firstName} {profile?.personalInfo?.lastName}</h3>
                   <p className="text-sm text-muted-foreground">Level {userStats.currentLevel} • {userStats.totalPoints} points</p>
                 </div>
-                <Button variant="outline" onClick={() => navigate('/profile')}>
+                <Button variant="outline" onClick={() => navigate('/onboarding')}>
                   Edit Profile
                 </Button>
               </div>

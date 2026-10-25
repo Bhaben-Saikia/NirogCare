@@ -379,7 +379,7 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  <Button className="w-full" onClick={() => navigate('/profile')}>
+                  <Button className="w-full" onClick={() => navigate('/medical-id')}>
                     View Full Profile
                   </Button>
                 </CardContent>

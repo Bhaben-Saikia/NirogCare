@@ -1,16 +1,16 @@
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import App from "./NirogCareOriginalFixed.tsx";
+import App from "./App";
+import { ErrorBoundary } from "./components/ErrorBoundary";
+import { AppProvider } from "@/context/AppContext";
 import "./index.css";
 
-const root = createRoot(document.getElementById("root")!);
-import { ErrorBoundary } from "./components/ErrorBoundary";
-
-import { AppProvider } from "@/context/AppContext";
-
-root.render(
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
     <ErrorBoundary>
-        <AppProvider>
-            <App />
-        </AppProvider>
+      <AppProvider>
+        <App />
+      </AppProvider>
     </ErrorBoundary>
+  </StrictMode>
 );

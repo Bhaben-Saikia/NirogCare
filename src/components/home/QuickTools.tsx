@@ -2,54 +2,7 @@ import { Link } from 'react-router-dom';
 import { Landmark, Lightbulb, Bell, Activity, ArrowUpRight, MapPin, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-
-const tools = [
-  {
-    icon: Landmark,
-    title: 'Govt Schemes',
-    subtitle: 'Free health benefits & subsidies',
-    href: '/govt-schemes',
-    gradient: 'from-amber-500 to-orange-600',
-    iconBg: 'bg-gradient-to-br from-amber-400 to-orange-500',
-    glow: 'group-hover:shadow-amber-500/40',
-  },
-  {
-    icon: Lightbulb,
-    title: 'Health Tips',
-    subtitle: 'Daily wellness advice',
-    href: '/health-tips',
-    gradient: 'from-sky-500 to-blue-600',
-    iconBg: 'bg-gradient-to-br from-sky-400 to-blue-500',
-    glow: 'group-hover:shadow-sky-500/40',
-  },
-  {
-    icon: Bell,
-    title: 'Reminders',
-    subtitle: 'Medicine & appointment alerts',
-    href: '/reminders',
-    gradient: 'from-violet-500 to-purple-600',
-    iconBg: 'bg-gradient-to-br from-violet-400 to-purple-500',
-    glow: 'group-hover:shadow-violet-500/40',
-  },
-  {
-    icon: Activity,
-    title: 'Health Tools',
-    subtitle: 'BMI, trackers & more',
-    href: '/health-tools',
-    gradient: 'from-rose-500 to-pink-600',
-    iconBg: 'bg-gradient-to-br from-rose-400 to-pink-500',
-    glow: 'group-hover:shadow-rose-500/40',
-  },
-  {
-    icon: MapPin,
-    title: 'Nearby Stores',
-    subtitle: 'Find pharmacies near you',
-    href: '/nearby-stores',
-    gradient: 'from-emerald-500 to-teal-600',
-    iconBg: 'bg-gradient-to-br from-emerald-400 to-teal-500',
-    glow: 'group-hover:shadow-emerald-500/40',
-  },
-];
+import { useTranslation } from '@/hooks/useTranslation';
 
 const container = {
   hidden: { opacity: 0 },
@@ -76,11 +29,17 @@ const item = {
   }
 };
 
-interface ToolCardProps {
-  tool: typeof tools[0];
+interface ToolItem {
+  icon: any;
+  title: string;
+  subtitle: string;
+  href: string;
+  gradient: string;
+  iconBg: string;
+  glow: string;
 }
 
-function ToolCard({ tool }: ToolCardProps) {
+function ToolCard({ tool }: { tool: ToolItem }) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -91,12 +50,10 @@ function ToolCard({ tool }: ToolCardProps) {
         onMouseLeave={() => setIsHovered(false)}
         className={`group relative bg-card rounded-3xl p-6 shadow-lg hover:shadow-2xl ${tool.glow} transition-all duration-500 hover:-translate-y-2 border border-border/50 block h-full overflow-hidden`}
       >
-        {/* Background gradient on hover */}
         <motion.div
           className={`absolute inset-0 bg-gradient-to-br ${tool.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}
         />
 
-        {/* Animated corner decoration */}
         <motion.div
           className={`absolute -top-10 -right-10 w-32 h-32 rounded-full bg-gradient-to-br ${tool.gradient} opacity-10`}
           animate={isHovered ? { scale: 1.5, opacity: 0.15 } : { scale: 1, opacity: 0.1 }}
@@ -104,7 +61,6 @@ function ToolCard({ tool }: ToolCardProps) {
         />
         
         <div className="relative">
-          {/* Icon with enhanced styling */}
           <motion.div 
             animate={isHovered ? { scale: 1.1, rotate: 5, y: -5 } : { scale: 1, rotate: 0, y: 0 }}
             transition={{ duration: 0.3 }}
@@ -131,7 +87,6 @@ function ToolCard({ tool }: ToolCardProps) {
           </div>
         </div>
 
-        {/* Bottom border animation */}
         <motion.div
           className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${tool.gradient}`}
           initial={{ scaleX: 0 }}
@@ -145,9 +100,58 @@ function ToolCard({ tool }: ToolCardProps) {
 }
 
 export default function QuickTools() {
+  const { t } = useTranslation();
+
+  const tools: ToolItem[] = [
+    {
+      icon: Landmark,
+      title: t.quickTools.govtSchemes,
+      subtitle: t.quickTools.govtSchemesSubtitle,
+      href: '/govt-schemes',
+      gradient: 'from-amber-500 to-orange-600',
+      iconBg: 'bg-gradient-to-br from-amber-400 to-orange-500',
+      glow: 'group-hover:shadow-amber-500/40',
+    },
+    {
+      icon: Lightbulb,
+      title: t.quickTools.healthTips,
+      subtitle: t.quickTools.healthTipsSubtitle,
+      href: '/health-tips',
+      gradient: 'from-sky-500 to-blue-600',
+      iconBg: 'bg-gradient-to-br from-sky-400 to-blue-500',
+      glow: 'group-hover:shadow-sky-500/40',
+    },
+    {
+      icon: Bell,
+      title: t.quickTools.reminders,
+      subtitle: t.quickTools.remindersSubtitle,
+      href: '/reminders',
+      gradient: 'from-violet-500 to-purple-600',
+      iconBg: 'bg-gradient-to-br from-violet-400 to-purple-500',
+      glow: 'group-hover:shadow-violet-500/40',
+    },
+    {
+      icon: Activity,
+      title: t.quickTools.healthTools,
+      subtitle: t.quickTools.healthToolsSubtitle,
+      href: '/health-tools',
+      gradient: 'from-rose-500 to-pink-600',
+      iconBg: 'bg-gradient-to-br from-rose-400 to-pink-500',
+      glow: 'group-hover:shadow-rose-500/40',
+    },
+    {
+      icon: MapPin,
+      title: t.nearbyStores.title,
+      subtitle: t.nearbyStores.subtitle,
+      href: '/nearby-stores',
+      gradient: 'from-emerald-500 to-teal-600',
+      iconBg: 'bg-gradient-to-br from-emerald-400 to-teal-500',
+      glow: 'group-hover:shadow-emerald-500/40',
+    },
+  ];
+
   return (
     <section className="py-16 md:py-24 bg-gradient-to-b from-muted/30 to-background relative overflow-hidden">
-      {/* Background decorations */}
       <div className="absolute inset-0 pointer-events-none">
         <motion.div
           className="absolute top-1/4 left-10 w-48 h-48 bg-primary/5 rounded-full blur-3xl"
@@ -182,14 +186,14 @@ export default function QuickTools() {
             >
               <Sparkles className="w-4 h-4 text-accent" />
             </motion.div>
-            <span className="text-accent font-semibold text-sm">Quick Access</span>
+            <span className="text-accent font-semibold text-sm">{t.quickTools.title}</span>
           </motion.div>
 
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            Essential Health Tools
+            {t.quickTools.title}
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Everything you need at your fingertips for a healthier life
+            {t.quickTools.subtitle}
           </p>
         </motion.div>
 

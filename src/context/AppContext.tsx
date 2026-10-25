@@ -98,6 +98,8 @@ function getHtmlLangCode(language: string): string {
     'English': 'en',
     'हिंदी': 'hi',
     'Hindi': 'hi',
+    'অসমীয়া': 'as',
+    'Assamese': 'as',
     'தமிழ்': 'ta',
     'Tamil': 'ta',
     'తెలుగు': 'te',

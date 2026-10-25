@@ -18,33 +18,8 @@ import {
     ArrowUpRight,
     Sparkles
 } from 'lucide-react';
-
-const footerLinks = {
-    product: [
-        { label: 'AI Health Chat', href: '/chat' },
-        { label: 'Find Pharmacy', href: '/nearby-stores' },
-        { label: 'Health Tools', href: '/health-tools' },
-        { label: 'Symptom Checker', href: '/symptom-checker' },
-    ],
-    resources: [
-        { label: 'Health Tips', href: '/health-tips' },
-        { label: 'Govt Schemes', href: '/govt-schemes' },
-        { label: 'Dashboard', href: '/dashboard' },
-        { label: 'Settings', href: '/settings' },
-    ],
-    company: [
-        { label: 'About Us', href: '#' },
-        { label: 'Careers', href: '#' },
-        { label: 'Blog', href: '#' },
-        { label: 'Contact', href: '#' },
-    ],
-    legal: [
-        { label: 'Privacy Policy', href: '#' },
-        { label: 'Terms of Service', href: '#' },
-        { label: 'Cookie Policy', href: '#' },
-        { label: 'Disclaimer', href: '#' },
-    ],
-};
+import { useTranslation } from '@/hooks/useTranslation';
+import { useAppContext } from '@/context/AppContext';
 
 const socialLinks = [
     { icon: Facebook, href: '#', label: 'Facebook' },
@@ -56,6 +31,35 @@ const socialLinks = [
 
 export default function Footer() {
     const currentYear = new Date().getFullYear();
+    const { t } = useTranslation();
+    const { t: appT } = useAppContext();
+
+    const footerLinks = {
+        product: [
+            { label: t.hero.aiHealthChat, href: '/chat' },
+            { label: t.nearbyStores.title, href: '/nearby-stores' },
+            { label: t.quickTools.healthTools, href: '/health-tools' },
+            { label: 'Symptom Checker', href: '/symptom-checker' },
+        ],
+        resources: [
+            { label: t.quickTools.healthTips, href: '/health-tips' },
+            { label: t.quickTools.govtSchemes, href: '/govt-schemes' },
+            { label: appT.dashboard, href: '/dashboard' },
+            { label: appT.settings, href: '/settings' },
+        ],
+        company: [
+            { label: 'About Us', href: '#' },
+            { label: 'Careers', href: '#' },
+            { label: 'Blog', href: '#' },
+            { label: 'Contact', href: '#' },
+        ],
+        legal: [
+            { label: 'Privacy Policy', href: '#' },
+            { label: 'Terms of Service', href: '#' },
+            { label: 'Cookie Policy', href: '#' },
+            { label: 'Disclaimer', href: '#' },
+        ],
+    };
 
     return (
         <footer className="bg-gradient-to-b from-background to-muted/30 border-t border-border/50 relative overflow-hidden">
@@ -83,10 +87,10 @@ export default function Footer() {
                 >
                     <div className="max-w-2xl mx-auto text-center">
                         <h3 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-3">
-                            Stay Updated with Health Tips
+                            {t.healthTips.title}
                         </h3>
                         <p className="text-muted-foreground mb-6">
-                            Get weekly health tips, wellness advice, and platform updates delivered to your inbox.
+                            {t.healthTips.subtitle}
                         </p>
                         <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
                             <input
@@ -120,15 +124,14 @@ export default function Footer() {
                                 </motion.div>
                                 <div>
                                     <h2 className="font-display font-bold text-xl text-foreground flex items-center gap-2">
-                                        Nirog Care
+                                        {t.hero.title}
                                         <Sparkles className="w-4 h-4 text-primary" />
                                     </h2>
-                                    <p className="text-xs text-muted-foreground">AI Health Companion</p>
+                                    <p className="text-xs text-muted-foreground">{t.hero.badge}</p>
                                 </div>
                             </Link>
                             <p className="text-muted-foreground text-sm leading-relaxed mb-5">
-                                Making quality healthcare accessible to everyone, regardless of language,
-                                location, or technical expertise.
+                                {t.hero.subtitle}
                             </p>
 
                             {/* Contact Info */}
@@ -150,10 +153,10 @@ export default function Footer() {
 
                         {/* Links Columns */}
                         <div>
-                            <h4 className="font-semibold text-foreground mb-4">Product</h4>
+                            <h4 className="font-semibold text-foreground mb-4">{t.header.services}</h4>
                             <ul className="space-y-2.5">
                                 {footerLinks.product.map((link) => (
-                                    <li key={link.label}>
+                                    <li key={link.href}>
                                         <Link
                                             to={link.href}
                                             className="text-muted-foreground text-sm hover:text-primary transition-colors inline-flex items-center gap-1 group"
@@ -167,10 +170,10 @@ export default function Footer() {
                         </div>
 
                         <div>
-                            <h4 className="font-semibold text-foreground mb-4">Resources</h4>
+                            <h4 className="font-semibold text-foreground mb-4">{t.quickTools.title}</h4>
                             <ul className="space-y-2.5">
                                 {footerLinks.resources.map((link) => (
-                                    <li key={link.label}>
+                                    <li key={link.href}>
                                         <Link
                                             to={link.href}
                                             className="text-muted-foreground text-sm hover:text-primary transition-colors inline-flex items-center gap-1 group"

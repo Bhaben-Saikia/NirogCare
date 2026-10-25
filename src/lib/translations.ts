@@ -3,7 +3,7 @@
  * Multi-language support for the entire app
  */
 
-export type SupportedLanguage = 'English' | 'हिंदी' | 'தமிழ்' | 'తెలుగు' | 'ಕನ್ನಡ' | 'मराठी' | 'বাংলা' | 'ગુજરાતી';
+export type SupportedLanguage = 'English' | 'हिंदी' | 'অসমীয়া' | 'தமிழ்' | 'తెలుగు' | 'ಕನ್ನಡ' | 'मराठी' | 'বাংলা' | 'ગુજરાતી';
 
 export interface Translations {
     // Common
@@ -559,6 +559,65 @@ const translations: Record<SupportedLanguage, Translations> = {
         online: 'ઓનલાઈન',
         offline: 'ઓફલાઈન',
     },
+    'অসমীয়া': {
+        home: 'মুখ্য পৃষ্ঠা',
+        services: 'সেৱাসমূহ',
+        pharmacy: 'ফাৰ্মাচী',
+        tips: 'স্বাস্থ্য পৰামৰ্শ',
+        schemes: 'চৰকাৰী আঁচনি',
+        dashboard: 'ডেশ্ববৰ্ড',
+        settings: 'ছেটিংছ',
+        chat: 'এআই সহায়ক',
+        search: 'সন্ধান কৰক...',
+
+        heroTitle: 'আপোনাৰ ব্যক্তিগত এআই স্বাস্থ্য সহযোগী',
+        heroSubtitle: 'ভাৰতৰ বাবে আধুনিক স্বাস্থ্য সেৱা — প্রেস্ক্ৰিপশ্বন স্কেনিং, এআই পৰামৰ্শ আৰু ঔষধৰ সোঁৱৰণী',
+        getStarted: 'আৰম্ভ কৰক',
+        talkToAI: 'এআইৰ সৈতে কথা পাতক',
+
+        prescriptionScanner: 'প্ৰেস্ক্ৰিপশ্বন স্কেনাৰ',
+        aiPowered: 'এআই চালিত',
+        uploadPrescription: 'প্ৰেস্ক্ৰিপশ্বন আপলোড কৰক',
+        analyzeWithAI: 'এআইৰ দ্বাৰা বিশ্লেষণ কৰক',
+        tryDemo: 'ডেমো চাওক',
+
+        healthTools: 'স্বাস্থ্য সঁজুলি',
+        bmiCalculator: 'BMI কেলকুলেটৰ',
+        waterTracker: 'পানী অনুসৰণ',
+        stepCounter: 'খোজ গণনা',
+        sleepMonitor: 'টোপনি নিৰীক্ষণ',
+        heartRate: 'হৃদস্পন্দন',
+        calorieTracker: 'কেলৰী অনুসৰণ',
+        meditation: 'ধ্যান',
+        eyeCare: 'চকুৰ যত্ন',
+
+        reminders: 'ঔষধ সোঁৱৰণী',
+        addReminder: 'সোঁৱৰণী যোগ কৰক',
+        medicineName: 'ঔষধৰ নাম',
+        frequency: 'বাৰংবাৰতা',
+        time: 'সময়',
+
+        emergency: 'জৰুৰীকালীন',
+        callEmergency: '১০৮ লৈ ফোন কৰক',
+
+        askAnything: 'স্বাস্থ্যৰ বিষয়ে যিকোনো কথা সোধক...',
+        typeQuestion: 'আপোনাৰ প্ৰশ্ন লিখক...',
+
+        save: 'সংৰক্ষণ কৰক',
+        cancel: 'বাতিল কৰক',
+        delete: 'মচি পেলাওক',
+        edit: 'সম্পাদনা কৰক',
+        close: 'বন্ধ কৰক',
+        back: 'উভতি যাওক',
+        next: 'পৰৱৰ্তী',
+        submit: 'দাখিল কৰক',
+        loading: 'লোড হৈ আছে...',
+
+        active: 'সক্ৰিয়',
+        inactive: 'নিষ্ক্ৰিয়',
+        online: 'অনলাইন',
+        offline: 'অফলাইন',
+    },
 };
 
 /**
@@ -570,6 +629,9 @@ export function getTranslations(language: string): Translations {
         'english': 'English',
         'hindi': 'हिंदी',
         'हिंदी': 'हिंदी',
+        'assamese': 'অসমীয়া',
+        'অসমীয়া': 'অসমীয়া',
+        'as': 'অসমীয়া',
         'tamil': 'தமிழ்',
         'தமிழ்': 'தமிழ்',
         'telugu': 'తెలుగు',

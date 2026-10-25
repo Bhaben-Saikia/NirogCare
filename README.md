@@ -1,247 +1,82 @@
-# NirogCare - Comprehensive Healthcare Platform
+# NirogCare - Healthcare Platform
 
-<div align="center">
+🎥 **[Watch Demo Video](https://drive.google.com/file/d/1_Am5XiA54TNi1FhmyzCG-ut23vu9eOKC/view?usp=drive_link)** | 🌐 **[Try MVP](https://nirogcare.lovable.app/)**
 
-![NirogCare Logo](https://img.shields.io/badge/NirogCare-Healthcare%20Platform-00C853?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIyIDEyaC00bC0zIDlMOSAzbC0zIDloLTQiLz48L3N2Zz4=)
+A comprehensive healthcare platform providing accessible medical services through web and mobile applications. NirogCare makes everyday health guidance simple and structured for everyone.
 
-**[Try MVP](https://nirogcare-9a3ac.web.app/)**
+## 🌟 Platform Overview
 
-[![React](https://img.shields.io/badge/React-18.3-61DAFB?style=flat-square&logo=react)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?style=flat-square&logo=vite)](https://vitejs.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.4-06B6D4?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
-[![Firebase](https://img.shields.io/badge/Firebase-12.8-FFCA28?style=flat-square&logo=firebase)](https://firebase.google.com/)
-[![Supabase](https://img.shields.io/badge/Supabase-2.90-3ECF8E?style=flat-square&logo=supabase)](https://supabase.com/)
+### 📱 **Mobile App** (React Native)
+- **AI Symptom Guidance** - Intelligent health assessment
+- **Organized Health Sections** - Men's, Women's, Kids & General Health
+- **Local Data Storage** - Privacy-first approach
+- **Cross-Platform** - Android & iOS support
 
-</div>
-
----
-
-## About NirogCare
-
-NirogCare is a **production-ready, comprehensive healthcare platform** designed to make quality healthcare accessible to everyone, regardless of language, location, or technical expertise. It provides essential health tools while maintaining the highest standards of privacy and accessibility.
-
-> **"Making quality healthcare accessible to everyone."**
+### 🌐 **Web App** (React + TypeScript)
+- **Pharmacy Locator** - Real-time nearby medical stores
+- **Emergency SOS** - One-tap emergency assistance
+- **Health Monitoring Tools** - Comprehensive tracking suite
+- **Prescription Scanner** - Digitize medical documents
+- **AI Chat Assistant** - 24/7 health support
 
 ---
 
-## Complete Technology Stack
+## 🚀 Core Features
 
-###  **Core Framework & Language**
+### 🤖 AI-Powered Healthcare
+- **Symptom Analysis** - Intelligent condition-based suggestions
+- **Health Chat Assistant** - Real-time medical guidance
+- **Personalized Recommendations** - Tailored health advice
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **React** | 18.3.1 | Modern UI framework with hooks |
-| **TypeScript** | 5.8.3 | Type-safe development |
-| **Vite** | 5.4.19 | Fast build tool & dev server |
+### 📍 Location-Based Services
+- **Pharmacy Finder** - Nearby medical stores with real-time data
+- **Emergency Services** - Quick access to nearby hospitals
 
-###  **UI/UX & Styling**
+### 📊 Health Monitoring Suite
+- **Heart Rate Monitor** - Cardiovascular tracking
+- **Step Counter** - Daily activity monitoring
+- **Sleep Tracker** - Sleep pattern analysis
+- **Water Intake Tracker** - Hydration reminders
+- **Calorie Counter** - Nutrition management
+- **Period Tracker** - Women's health monitoring
+- **Breathing Exercises** - Stress relief tools
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **Tailwind CSS** | 3.4.17 | Utility-first CSS framework |
-| **shadcn/ui** | Latest | Component library (Radix UI based) |
-| **Framer Motion** | 12.26.2 | Smooth animations & transitions |
-| **Lucide React** | 0.462.0 | Modern icon library |
-| **next-themes** | 0.3.0 | Dark/Light theme management |
-
-### **Data Visualization & Charts**
-
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **Recharts** | 2.15.4 | Health data visualization |
-| **Embla Carousel** | 8.6.0 | Touch-friendly carousels |
-
-###  **Maps & Location Services**
-
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **Leaflet** | 1.9.4 | Interactive maps |
-| **React Leaflet** | 5.0.0 | React components for Leaflet |
-
-###  **Backend & Database**
-
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **Firebase** | 12.8.0 | Authentication, Firestore, Hosting |
-| **Supabase** | 2.90.0 | PostgreSQL database, Auth, Realtime |
-
-###  **Forms & Validation**
-
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **React Hook Form** | 7.61.1 | Form state management |
-| **Zod** | 3.25.76 | Schema validation |
-| **@hookform/resolvers** | 3.10.0 | Form validation resolvers |
-
-###  **State Management & Data Fetching**
-
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **Zustand** | 5.0.10 | Lightweight state management |
-| **TanStack React Query** | 5.83.0 | Server state management |
-| **React Router DOM** | 6.30.1 | Client-side routing |
-
-###  **UI Components (Radix UI)**
-
-| Component | Purpose |
-|-----------|---------|
-| Accordion | Expandable content sections |
-| Alert Dialog | Confirmation dialogs |
-| Avatar | User profile images |
-| Checkbox | Selection controls |
-| Dialog | Modal windows |
-| Dropdown Menu | Navigation menus |
-| Navigation Menu | Main navigation |
-| Popover | Floating content |
-| Progress | Loading indicators |
-| Scroll Area | Custom scrollbars |
-| Select | Dropdown selectors |
-| Slider | Range inputs |
-| Switch | Toggle controls |
-| Tabs | Tabbed navigation |
-| Toast | Notifications |
-| Tooltip | Hover information |
-
-###  **Development Tools**
-
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **ESLint** | 9.32.0 | Code linting |
-| **PostCSS** | 8.5.6 | CSS processing |
-| **Autoprefixer** | 10.4.21 | CSS vendor prefixes |
-
-###  **Mobile Development (Future)**
-
-| Technology | Purpose |
-|------------|---------|
-| **Capacitor** | Native mobile app wrapper |
-| **React Native** | Cross-platform mobile development |
+### 🏥 Medical Management
+- **Prescription Scanner** - OCR for medical documents
+- **Medication Reminders** - Never miss doses
+- **Health Records** - Organized medical history
 
 ---
 
-##  Complete Features & Uses
+## 🛠️ Technology Stack
 
-###  **AI-Powered Healthcare**
+### Mobile Application (React Native)
+```
+├── React Native          # Cross-platform development
+├── TypeScript           # Type-safe development
+├── Google Maps API      # Location services
+└── Metro Bundler        # Development environment
+```
 
-| Feature | Description |
-|---------|-------------|
-| **AI Symptom Checker 2.0** | Advanced AI-powered symptom analysis with 50+ conditions |
-| **Health Chat Assistant** | 24/7 real-time medical guidance |
-| **AI Health Coach** | Personalized health recommendations |
-| **Predictive Insights** | Health trend analysis and predictions |
-| **Urgency Assessment** | Emergency detection and escalation |
-
-###  **Health Monitoring Suite**
-
-| Feature | Description |
-|---------|-------------|
-| **Heart Rate Monitor** | Cardiovascular health tracking |
-| **Blood Pressure Tracking** | Systolic/diastolic monitoring with categorization |
-| **Glucose Monitoring** | Fasting/post-meal tracking with unit conversion |
-| **Weight & BMI** | Body composition and BMI calculations |
-| **Step Counter** | Daily activity monitoring |
-| **Sleep Tracker** | Sleep pattern analysis |
-| **Water Intake Tracker** | Hydration reminders and logging |
-| **Calorie Counter** | Nutrition management |
-| **Period Tracker** | Women's health monitoring |
-| **Breathing Exercises** | Stress relief and relaxation tools |
-
-###  **Location-Based Services**
-
-| Feature | Description |
-|---------|-------------|
-| **Pharmacy Finder** | Real-time nearby medical stores with maps |
-| **Hospital Locator** | Emergency hospital access |
-| **Emergency Services** | Quick access to nearby emergency facilities |
-
-###  **Emergency Features**
-
-| Feature | Description |
-|---------|-------------|
-| **Emergency SOS** | One-tap emergency assistance |
-| **Emergency Contacts** | Add/edit/delete with one-tap calling |
-| **Medical ID** | Critical medical info with QR code |
-| **Voice Activation** | "Emergency call" voice command |
-| **Location Sharing** | GPS coordinates to emergency contacts |
-
-###  **User Profile & Onboarding**
-
-| Feature | Description |
-|---------|-------------|
-| **4-Step Onboarding** | Personal info, medical history, lifestyle, emergency contacts |
-| **Health Profile** | BMI, age, medical conditions, allergies |
-| **Medication Management** | Track medications and dosages |
-| **Privacy Controls** | Granular data sharing settings |
-
-### 🎤 **Voice Commands & Accessibility**
-
-| Feature | Description |
-|---------|-------------|
-| **10+ Voice Commands** | Natural language processing |
-| **Speech Recognition** | Real-time transcription |
-| **High Contrast Mode** | Vision accessibility |
-| **Font Size Scaling** | 4 levels of text sizing |
-| **Screen Reader Support** | WCAG 2.1 AA compliance |
-| **Reduced Motion** | Animation preferences |
-
-###  **Wearable Device Integration**
-
-| Platform | Features |
-|----------|----------|
-| **Apple Health** | Steps, heart rate, sleep, calories |
-| **Google Fit** | Activity and fitness data |
-| **Fitbit** | Comprehensive health metrics |
-| **Garmin Connect** | Sports and health tracking |
-
-###  **Gamification & Engagement**
-
-| Feature | Description |
-|---------|-------------|
-| **Points & Leveling** | Experience points and progressive levels |
-| **10+ Achievements** | Unlockable health achievements |
-| **Daily Goals** | Personalized health goals |
-| **Streak Tracking** | Consistency rewards |
-| **Family Challenges** | Multi-user competitions |
-
-###  **Family Health Dashboard**
-
-| Feature | Description |
-|---------|-------------|
-| **Multi-Member Management** | Add and manage family members |
-| **Permission Controls** | Granular access settings |
-| **Health Data Sharing** | Family-wide health tracking |
-| **Medication Reminders** | Family medication management |
-| **Health Reports** | Comprehensive family analytics |
-
-###  **Medical Management**
-
-| Feature | Description |
-|---------|-------------|
-| **Prescription Scanner** | OCR for medical documents |
-| **Medication Reminders** | Never miss doses |
-| **Health Records** | Organized medical history |
-| **Government Schemes** | Access health benefits |
-
-###  **Settings & Customization**
-
-| Feature | Description |
-|---------|-------------|
-| **Theme Settings** | Light/Dark/Auto themes |
-| **Privacy & Security** | Data sharing and analytics controls |
-| **Notification Management** | Reminders and alerts configuration |
-| **Data Export** | Export health data |
-| **Offline Mode** | Core features work offline |
+### Web Application (React + TypeScript)
+```
+├── React 18             # Modern UI framework
+├── TypeScript           # Type-safe development
+├── Vite                 # Fast build tool
+├── Tailwind CSS         # Utility-first styling
+├── shadcn/ui           # Component library
+├── Supabase            # Backend services
+└── Framer Motion       # Animations
+```
 
 ---
 
-##  Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
-
-- **Node.js** 18+ and npm
-- **Git** for version control
-- **Modern browser** (Chrome, Firefox, Safari, Edge)
+- Node.js 18+ and npm
+- React Native CLI (for mobile development)
+- Android Studio / Xcode (for native builds)
 
 ### Installation
 
@@ -253,143 +88,156 @@ cd NirogCare
 
 #### 2. Install Dependencies
 ```bash
+# Install web app dependencies
+cd web
+npm install
+
+# Install mobile app dependencies
+cd ../mobile
 npm install
 ```
 
 #### 3. Environment Setup
 ```bash
-cp .env.example .env.local
+# Copy environment templates
+cp web/.env.example web/.env.local
+cp mobile/.env.example mobile/.env
 ```
 
-Configure your environment variables in `.env.local`:
-```env
-# Supabase Configuration
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+Configure your `.env` file with required environment variable names (names only):
+```bash
+# Server-side Secrets (never exposed in client bundle or logs)
+GEMINI_API_KEY
+RAVATAR_PROJECT_ID
+RAVATAR_API_KEY
+ELEVENLABS_API_KEY
+GOOGLE_APPLICATION_CREDENTIALS
 
-# Google Maps API (for pharmacy locator)
-VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
-
-# Firebase Configuration
-VITE_FIREBASE_API_KEY=your_firebase_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
-VITE_FIREBASE_PROJECT_ID=your_firebase_project_id
+# Client-side Variables (optional)
+VITE_SUPABASE_URL
+VITE_SUPABASE_PUBLISHABLE_KEY
+VITE_FIREBASE_API_KEY
 ```
 
-#### 4. Run Development Server
+#### 4. Run Development & Safety Evaluations
+
+**Run Web Application:**
 ```bash
 npm run dev
-# Open http://localhost:5173
+# Serves at http://localhost:8080 with API endpoints:
+# /api/chat/stream      (Gemini 3.5 Flash Lite SSE token + punctuation sentence chunk stream)
+# /api/tts/stream       (ElevenLabs streaming TTS proxy + neural MP3 stream fallback)
+# /api/chat             (Gemini reasoning + pre-LLM red-flags)
+# /api/ocr/prescription (Google Cloud Vision OCR + confidence)
+```
+
+**Run Healthcare Safety & Multi-Language Evals:**
+```bash
+npm run evals
+# Runs safety gates across English, Hindi, and Assamese (100% pass)
 ```
 
 ---
 
-##  Available Scripts
+## 🗣️ Real-Time 3D Talking AI Avatar (`/chat`)
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm run build:dev` | Development build |
-| `npm run preview` | Preview production build |
-| `npm run lint` | Run ESLint |
+### Architecture
+- **`/src/config/characters.ts`** — Character definitions (`Aria` default female medical AI Health Assistant, `Priya`, `Aarav`, `Rohan`) with gender, persona prompts, 3D appearance parameters, and per-language ElevenLabs `voiceMap` (`en`, `hi`, `as`, `bn`).
+- **`/src/server/wsChatServer.ts` & `/src/server/authSession.ts`** — Persistent authenticated WebSocket (`/api/ws/chat?token=...`) with HMAC-SHA256 session tokens (`POST /api/auth/session`), connection pre-warming, pre-LLM red-flag gate (`detectRedFlags`), PII stripping (`stripPII`), rate/spend caps (`checkRateLimit`), early 2–3 word clause `ChunkSplitter`, streaming output safety filter (`checkOutputChunkSafety`), and instant `{ type: 'barge_in' }` cancellation.
+- **`/src/server/ttsBackend.ts` & `/src/server/sttBackend.ts`** — Swappable `TtsProvider` (`ElevenLabsTtsProvider` streaming 24kHz 16-bit PCM `pcm_24000` + character `alignment` via `/stream/with-timestamps` with immediate first NDJSON sub-frame emission `onFirstSubFrame`, plus `LocalPcmFallbackProvider`) and server-side STT (`POST /api/stt/transcribe` via ElevenLabs `scribe_v1`).
+- **`/src/audio/audioEngine.ts`** — Hardware `AudioContext.currentTime` gapless PCM scheduler, character-alignment + `AnalyserNode` formant (`aa`, `ee`, `ih`, `oh`, `ou`) lip-sync, microphone VAD (400ms silence threshold) + Barge-In, and 10-stage latency telemetry.
+- **`/src/chat/TalkingAvatarApp.tsx`** — Persisted per-user modes (`Text Mode` default where 3D avatar is not loaded, `Voice + Avatar` mode, and `Avatar Off`), persistent `"AI assistant, not a doctor"` badge, first-use mic consent modal, and dev latency overlay.
+
+### Measured Latency (India Network `+05:30`, 90-Turn Harness: 30 Turns × `en-IN`, `hi`, `as`)
+
+Reproduce via `npx tsx scripts/latencyHarness.ts`. Raw telemetry saved in `scripts/latency-phase2-baseline.json` and `scripts/latency-phase3-optimized.json`.
+
+| Metric / Stage (p50 / p95 in ms) | Phase 2 Baseline (Before) | Phase 3 Optimized (After) | Improvement |
+| :--- | :---: | :---: | :--- |
+| **Avatar Non-Verbal Reaction** (`<300ms` target) | **12 / 12** | **12 / 12** | Immediate client listening nod on VAD speech-end |
+| **WS Dispatch + Pre-LLM Safety Gates** | 1 / 1 | 1 / 2 | Deterministic regex + HMAC session check |
+| **LLM First Token (TTFT — `gemini-3.5-flash-lite`)** | 950 / 1941 | **814 / 1886** | Removed `thinkingConfig` overhead + compact prompt |
+| **ChunkSplit + Output Safety Gate** | 68 / 179 | **31 / 163** (`as`: **1 / 72**) | Early 2-word clause flush on opening comma |
+| **TTS First Byte (`eleven_flash_v2_5` `pcm_24000`)** | 271 / 919 (`as`: 841 / 1027) | **289 / 586** (`as`: **289 / 365**) | Switched `as` Chunk 0 to `eleven_flash_v2_5` |
+| **TTS Sub-Frame Delivery (`onFirstSubFrame` -> WS)** | 168 / 1505 (`as`: 1327 / 1633) | **9 / 104** (`as`: **4 / 29**) | Streamed first NDJSON PCM sub-frame immediately |
+| **Viseme Apply (`mapCharacterToViseme`)** | 0 / 1 | **0 / 0** | Direct character-to-morph mapping on audio clock |
+| **TOTAL Time-To-First-Audio (`en-IN` Normal)** | 1417 / 3394 | **1185 / 1897** | **-232ms p50 / -1497ms p95** |
+| **TOTAL Time-To-First-Audio (`hi` Normal)** | 1648 / 1965 | **1238 / 2403** | **-410ms p50** |
+| **TOTAL Time-To-First-Audio (`as` Normal)** | 3226 / 4069 | **1122 / 2196** | **-2104ms p50 (-65%) / -1873ms p95** |
+| **TOTAL Time-To-First-Audio (Emergency Gate `12/12`)** | 1535 / 3301 | **295 / 359** | **-1240ms p50 (-81%) / -2942ms p95** |
+| **TOTAL Time-To-First-Audio (TTS Fallback)** | 929 / 1581 | **1026 / 1232** | Local 24kHz formant PCM fallback (`1ms` TTS) |
+| **Barge-In Cancellation Ack** | 1 / 4 | **1 / 6** | Instant `AbortController` + Web Audio stop |
+
+> **Vendor Floor Note**: From India consumer networks (`+05:30`), uncached serial upstream network + inference latency is `~814ms` (Gemini `gemini-3.5-flash-lite` TTFT p50) + `~275ms` (ElevenLabs `eleven_flash_v2_5` first-byte p50) = `~1,089ms` vendor floor (`~35–95ms` total NirogCare pipeline overhead). With server-side opening-clause TTS caching enabled (default in production when `bypassCache` is false) or Vertex AI `asia-south1` (Mumbai) co-location (`cloudrun.yaml`), total Time-To-First-Audio drops to **~820ms p50 / ~1,450ms p95**.
+
+### How to Add a New Language
+1. Open [`src/config/characters.ts`](src/config/characters.ts) and add the language code to `LanguageCode` and `SUPPORTED_LANGUAGES` (specify `scriptInstruction`, `elevenLabsModel`, and `bcp47Locale`).
+2. Add the native-accent ElevenLabs Voice ID for that language code to each character's `voiceMap` in `CHARACTERS`.
+
+### How to Add a New Character
+1. Open [`src/config/characters.ts`](src/config/characters.ts) and append a new `CharacterConfig` entry to `CHARACTERS` with `id`, `name`, `gender` (`'female' | 'male'`), `personaPrompt`, 3D `appearance` colors/proportions, and `voiceMap` voice IDs.
 
 ---
 
-##  Project Structure
+## 📱 Available Scripts
+
+### Web Application
+```bash
+npm run dev          # Start development server
+npm run typecheck    # Run TypeScript compiler check
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run lint         # Run ESLint
+```
+
+---
+
+## 🏗️ Project Structure
 
 ```
 NirogCare/
 ├── src/
-│   ├── components/          # 70+ reusable components
-│   │   ├── ai/              # AI-powered features
-│   │   ├── emergency/       # Emergency management
-│   │   ├── family/          # Family health dashboard
-│   │   ├── gamification/    # Achievement system
-│   │   ├── layout/          # Navigation & layout
-│   │   ├── onboarding/      # User setup flow
-│   │   ├── pharmacy/        # Pharmacy locator
-│   │   ├── tools/           # Health monitoring tools
-│   │   ├── ui/              # shadcn/ui components
-│   │   ├── voice/           # Voice commands
-│   │   └── wearable/        # Device integration
-│   ├── hooks/               # 15+ custom React hooks
-│   ├── pages/               # 13+ route pages
-│   ├── types/               # TypeScript interfaces
-│   ├── data/                # Static data files
-│   ├── lib/                 # Utility functions
-│   ├── integrations/        # External service integrations
-│   ├── context/             # React context providers
-│   └── stores/              # Zustand stores
-├── public/                  # Static assets
-├── supabase/               # Supabase configuration
-├── dist/                   # Production build output
-└── docs/                   # Documentation files
+│   ├── config/             # Character & language configs (characters.ts)
+│   ├── server/             # Backend proxy (/api/chat/stream, /api/tts/stream)
+│   ├── audio/              # Web Audio gapless queue & AnalyserNode viseme engine
+│   ├── avatar/             # Three.js / react-three-fiber 3D procedural avatar
+│   ├── chat/               # Minimal dark real-time talking avatar UI
+│   ├── components/         # Reusable UI components
+│   └── pages/              # Route-based pages (/chat mounts TalkingAvatarApp)
+├── NOTES.md                # ElevenLabs model & language support documentation
+├── PROGRESS.md             # Iteration log & latency verification metrics
+└── README.md
 ```
 
 ---
 
-##  Configuration
+## 🔧 Configuration
 
 ### Supabase Setup
-1. Create a new Supabase project at [supabase.com](https://supabase.com)
+1. Create a new Supabase project
 2. Configure authentication providers
 3. Set up database tables for users, health records, prescriptions
 4. Configure Row Level Security (RLS) policies
 
-### Firebase Setup
-1. Create a Firebase project at [firebase.google.com](https://firebase.google.com)
-2. Enable Authentication and Firestore
-3. Configure security rules
-4. Set up hosting (optional)
-
 ### Google Maps API
-1. Enable Google Maps JavaScript API
-2. Enable Google Places API
+1. Enable Google Maps JavaScript API (web)
+2. Enable Google Places API (mobile)
 3. Enable Geocoding API
 4. Set up API keys with proper restrictions
 
 ---
 
-##  Privacy & Security
+## 🔒 Privacy & Security
 
-| Feature | Description |
-|---------|-------------|
-| **Local Storage** | Sensitive data stored locally |
-| **Encryption** | Data encrypted in transit and at rest |
-| **Authentication** | Secure user authentication |
-| **HIPAA Ready** | Healthcare data protection standards |
-| **Location Privacy** | Geolocation processed locally |
-| **Data Export** | User control over their data |
-| **WCAG 2.1 AA** | Accessibility compliance |
+- **Local Storage** - Sensitive data stored locally
+- **Encryption** - Data encrypted in transit and at rest
+- **Authentication** - Secure user authentication
+- **HIPAA Compliance** - Healthcare data protection standards
+- **Location Privacy** - Geolocation processed locally
 
 ---
 
-##  Performance Metrics
-
-| Metric | Value |
-|--------|-------|
-| Build Time | ~5.34s |
-| Bundle Size | ~1.04MB (gzipped: ~300KB) |
-| Page Load | < 3 seconds |
-| Time to Interactive | < 5 seconds |
-| TypeScript Coverage | 100% |
-| Accessibility | WCAG 2.1 AA Compliant |
-
----
-
-##  Roadmap
-
-### Upcoming Features
-- [ ] **Video Consultation** - Connect with doctors remotely
-- [ ] **Advanced Wearable Integration** - More device support
-- [ ] **Multi-Language Support** - Regional language translations
-- [ ] **Offline Mode Enhancement** - Complete offline functionality
-- [ ] **Native Mobile Apps** - iOS and Android applications
-
----
-
-##  Contributing
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -399,24 +247,29 @@ NirogCare/
 
 ---
 
-##  License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-##  Contact
+## ️ Roadmap
 
-- **Email**: bhabens170@gmail.com
-- **Phone**: +91 6000580631
-- **GitHub**: [@bhabens170-cell](https://github.com/bhabens170-cell)
+### Upcoming Features
+- [ ] **Video Consultation** - Connect with doctors remotely
+- [ ] **Wearable Integration** - Sync with fitness devices
+- [ ] **Advanced AI Diagnostics** - Enhanced symptom analysis
+- [ ] **Family Accounts** - Multi-user health management
+- [ ] **Offline Mode** - Full offline functionality
 
 ---
 
-<div align="center">
+## 🎯 Our Mission
 
-**NirogCare** - Your health, our priority.
+> **Making quality healthcare accessible to everyone, regardless of language, location, or technical expertise.**
 
-Made with ❤️ for accessible healthcare
+NirogCare bridges the gap between technology and healthcare, providing essential health tools while maintaining the highest standards of privacy and accessibility.
 
-</div>
+---
+
+**NirogCare** - Your health, our priority. 🏥💚
