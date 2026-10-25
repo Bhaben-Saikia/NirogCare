@@ -45,4 +45,27 @@ export default defineConfig(() => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    chunkSizeWarningLimit: 1500,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("@google/genai") || id.includes("@google/generative-ai")) {
+              return "vendor-ai";
+            }
+            if (id.includes("lucide-react")) {
+              return "vendor-icons";
+            }
+            if (id.includes("leaflet") || id.includes("react-leaflet")) {
+              return "vendor-maps";
+            }
+            if (id.includes("three") || id.includes("@react-three")) {
+              return "vendor-three";
+            }
+          }
+        },
+      },
+    },
+  },
 }));
