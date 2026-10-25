@@ -600,20 +600,26 @@ class AvatarAudioEngine {
       };
       const targetBcp47 = langMap[item.language] || 'en-IN';
       utterance.lang = targetBcp47;
-      utterance.rate = 1.02;
-      utterance.pitch = item.characterId === 'aarav' || item.characterId === 'rohan' ? 0.92 : 1.05;
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
 
       const voices = window.speechSynthesis.getVoices();
       if (voices.length > 0) {
         const langPrefix = targetBcp47.split('-')[0].toLowerCase();
-        const match =
-          voices.find((v) => v.lang.toLowerCase() === targetBcp47.toLowerCase()) ||
-          voices.find(
-            (v) =>
-              v.lang.toLowerCase().startsWith(langPrefix) ||
-              (langPrefix === 'as' && v.lang.toLowerCase().startsWith('bn')) ||
-              (langPrefix === 'as' && v.lang.toLowerCase().startsWith('hi'))
-          );
+        // Priority 1: High-quality Online/Neural/Natural voices
+        const naturalMatch = voices.find(
+          (v) =>
+            (v.lang.toLowerCase() === targetBcp47.toLowerCase() || v.lang.toLowerCase().startsWith(langPrefix)) &&
+            (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Google') || v.name.includes('Online'))
+        );
+        // Priority 2: Standard language match
+        const exactMatch = voices.find((v) => v.lang.toLowerCase() === targetBcp47.toLowerCase());
+        const prefixMatch = voices.find((v) => v.lang.toLowerCase().startsWith(langPrefix));
+        const regionalMatch = voices.find(
+          (v) => (langPrefix === 'as' && v.lang.toLowerCase().startsWith('bn')) ||
+                 (langPrefix === 'as' && v.lang.toLowerCase().startsWith('hi'))
+        );
+        const match = naturalMatch || exactMatch || prefixMatch || regionalMatch;
         if (match) utterance.voice = match;
       }
 
