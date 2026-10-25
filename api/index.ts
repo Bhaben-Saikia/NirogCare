@@ -7,8 +7,13 @@ export const config = {
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
   try {
+    const rawHeaders = (req as any).headers || {};
+    const matchedPath = rawHeaders['x-matched-path'];
     const queryPath = (req as any).query?.path;
-    if (queryPath) {
+
+    if (typeof matchedPath === 'string' && matchedPath.startsWith('/api/')) {
+      req.url = matchedPath;
+    } else if (queryPath) {
       const segments = Array.isArray(queryPath) ? queryPath.join('/') : String(queryPath);
       req.url = '/api/' + segments;
     } else if (req.url && !req.url.startsWith('/api/')) {

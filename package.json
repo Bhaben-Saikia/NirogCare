@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "start:prod": "npx tsx src/server/cloudRunServer.ts",
-    "build": "vite build",
+    "build": "vite build && esbuild api/index.ts --bundle --platform=node --format=esm --target=node18 --outfile=api/index.js",
     "build:dev": "vite build --mode development",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "lint": "eslint .",
