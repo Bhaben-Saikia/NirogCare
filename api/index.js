@@ -2844,7 +2844,7 @@ function readBody(req) {
   });
 }
 
-// api/index.ts
+// src/server/vercelHandler.ts
 var config = {
   maxDuration: 60
 };

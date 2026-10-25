@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'http';
-import { handleApiRequest } from '../src/server/apiRouter';
+import { handleApiRequest } from './apiRouter';
 
 export const config = {
   maxDuration: 60,
