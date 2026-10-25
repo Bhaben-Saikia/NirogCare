@@ -260,6 +260,12 @@ export async function handleApiRequest(
 }
 
 function readBody(req: IncomingMessage): Promise<string> {
+  const vercelBody = (req as any).body;
+  if (vercelBody !== undefined && vercelBody !== null) {
+    if (typeof vercelBody === 'string') return Promise.resolve(vercelBody);
+    return Promise.resolve(JSON.stringify(vercelBody));
+  }
+
   return new Promise((resolve, reject) => {
     let data = '';
     req.on('data', (chunk: Buffer | string) => {

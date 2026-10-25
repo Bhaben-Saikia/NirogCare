@@ -7,8 +7,11 @@ export const config = {
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
   try {
-    // Ensure req.url starts with /api/
-    if (req.url && !req.url.startsWith('/api/')) {
+    const queryPath = (req as any).query?.path;
+    if (queryPath) {
+      const segments = Array.isArray(queryPath) ? queryPath.join('/') : String(queryPath);
+      req.url = '/api/' + segments;
+    } else if (req.url && !req.url.startsWith('/api/')) {
       req.url = '/api' + (req.url.startsWith('/') ? req.url : '/' + req.url);
     }
 
@@ -16,7 +19,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     if (!handled && !res.headersSent) {
       res.statusCode = 404;
       res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify({ error: 'API route not found' }));
+      res.end(JSON.stringify({ error: 'API route not found', url: req.url }));
     }
   } catch (error: any) {
     console.error('Vercel API Handler Error:', error);
