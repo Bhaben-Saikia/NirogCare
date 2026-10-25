@@ -26,7 +26,8 @@ import {
   Mic,
   MicOff,
   Send,
-  Square
+  Square,
+  Volume2
 } from 'lucide-react';
 import {
   CHARACTERS,
@@ -762,6 +763,22 @@ export const TalkingAvatarApp: React.FC = () => {
               </option>
             ))}
           </select>
+
+          {mode === 'voice' && (
+            <button
+              type="button"
+              onClick={togglePreferFreeVoice}
+              title={preferFreeVoice ? 'Using Free Browser Voice (0 Tokens)' : 'Using Cloud Voice (ElevenLabs)'}
+              className={`h-9 px-3 rounded-xl border text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm ${
+                preferFreeVoice
+                  ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400'
+                  : 'bg-card border-border text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Volume2 className="w-3.5 h-3.5" />
+              <span>{preferFreeVoice ? 'Free Voice (Active)' : 'Cloud Voice'}</span>
+            </button>
+          )}
 
           <div className="inline-flex items-center rounded-xl bg-muted p-0.5 border border-border">
             <button
