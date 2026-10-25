@@ -42,6 +42,7 @@ import {
   type CharacterAlignment,
   type TurnLatencyMetrics
 } from '../audio/audioEngine';
+import { buildOfflineClinicalReply } from '../server/offlineClinicalFallback';
 
 const LazyAvatarCanvas = React.lazy(() =>
   import('../avatar/AvatarCanvas').then((m) => ({ default: m.AvatarCanvas }))
@@ -445,7 +446,21 @@ export const TalkingAvatarApp: React.FC = () => {
 
       if (!response.ok || !response.body) {
         setIsWaitingFirstToken(false);
-        setDegradedNotice('Voice stream unavailable; switched to plain text.');
+        setDegradedNotice('Cloud connection paused; providing offline guidance.');
+        const fallbackText = buildOfflineClinicalReply(textToSend, currentLangConfig.code);
+        setMessages((prev) =>
+          prev.map((m) => (m.id === assistantMsgId ? { ...m, text: fallbackText } : m))
+        );
+        if (mode === 'voice') {
+          avatarAudioEngine.enqueueChunk({
+            turnId,
+            index: 0,
+            text: fallbackText,
+            characterId: currentCharacter.id,
+            language: currentLangConfig.code,
+            preferFreeVoice: true
+          });
+        }
         return;
       }
 
@@ -540,7 +555,21 @@ export const TalkingAvatarApp: React.FC = () => {
     } catch (err: unknown) {
       const errName = err instanceof Error ? err.name : '';
       if (errName !== 'AbortError') {
-        setDegradedNotice('Connection interrupted; continuing in text mode.');
+        setDegradedNotice('Connection interrupted; providing offline guidance.');
+        const fallbackText = buildOfflineClinicalReply(textToSend, currentLangConfig.code);
+        setMessages((prev) =>
+          prev.map((m) => (m.id === assistantMsgId && !m.text ? { ...m, text: fallbackText } : m))
+        );
+        if (mode === 'voice') {
+          avatarAudioEngine.enqueueChunk({
+            turnId,
+            index: 0,
+            text: fallbackText,
+            characterId: currentCharacter.id,
+            language: currentLangConfig.code,
+            preferFreeVoice: true
+          });
+        }
       }
     } finally {
       setIsWaitingFirstToken(false);

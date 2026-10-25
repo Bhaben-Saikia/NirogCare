@@ -31,8 +31,8 @@ const TOPIC_RULES: TopicRule[] = [
     }
   },
   {
-    // Fever / temperature / chills / body ache
-    pattern: /(fever|temperature|chills|shivering|body ache|viral|bukhar|jor|बुखार|ज्वर|तापमान|बदन दर्द|জ্বৰ|গা গৰম|গাৰ বিষ)/i,
+    // Fever / temperature / chills / body ache / unwell
+    pattern: /(fever|temperature|chills|shivering|body ache|viral|bukhar|jor|gaa?\s*beya|unwell|sick|ill|बुखार|ज्वर|तापमान|बदन दर्द|तबीयत|জ্বৰ|গা গৰম|গাৰ বিষ|গা বেয়া|অসুস্থ)/i,
     replies: {
       en: 'For mild fever, rest in a comfortable room, drink plenty of water, oral rehydration solution, or warm soup, and use a lukewarm sponge if needed. If fever lasts more than two days or rises above 102 degrees Fahrenheit, please consult a qualified doctor.',
       hi: 'हल्के बुखार में पर्याप्त आराम करें, खूब पानी, ओआरएस या सूप पिएं, और हल्के सूती कपड़े पहनें। यदि बुखार दो दिन से अधिक रहे या तेज हो जाए, तो तुरंत डॉक्टर से सलाह लें।',
