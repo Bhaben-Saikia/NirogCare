@@ -1,4 +1,4 @@
-# NirogCare (निरोग केयर)
+# NirogCare
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Vercel-black?style=flat-square&logo=vercel)](https://nirog-care-8e4v.vercel.app/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
