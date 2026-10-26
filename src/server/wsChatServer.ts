@@ -342,10 +342,17 @@ async function handleWsChatTurn(params: {
   const { cleanText: userMessage } = stripPII(rawUserMessage);
 
   const systemInstruction = [
-    `You are ${character.name}, an AI health assistant (NOT a doctor).`,
+    character.personaPrompt,
     langConfig.scriptInstruction,
-    'Start with a 2 to 3 word warm acknowledgment followed by a comma, then give 1 to 2 brief spoken sentences (max 35 words). Never diagnose, prescribe dosages, or use markdown/lists.'
-  ].join(' ');
+    'CONVERSATIONAL & CLINICAL GUIDANCE INSTRUCTIONS:',
+    '1. Directly and thoughtfully answer the user\'s specific question. Address their exact concerns, symptoms, or topic with genuine clinical intelligence and empathy.',
+    '2. Provide practical, evidence-based home-care advice, explain common causes, and suggest comforting self-care measures.',
+    '3. You are an AI health assistant, not a doctor. Never claim to give a definitive diagnosis, and never prescribe specific prescription drugs or pharmaceutical dosages.',
+    '4. Keep your answer conversational, warm, and natural for speech (approx. 50-80 words across 3-4 flowing sentences).',
+    '5. Do NOT repeat the exact same disclaimer phrases or robotic openings like "Namaste, for...". Vary your natural conversational openings and empathetic responses.',
+    '6. End with a helpful clarifying question or a gentle recommendation to consult a doctor if severe.',
+    '7. Spoken format only: NEVER output markdown asterisks (**bold**), bullet points, numbered lists, emojis, or stage directions.'
+  ].join('\n');
 
   const contents: Array<{ role: string; parts: Array<{ text: string }> }> = [];
   if (msg.history && Array.isArray(msg.history)) {
@@ -404,9 +411,9 @@ async function handleWsChatTurn(params: {
       try {
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:streamGenerateContent?alt=sse&key=${geminiKey}`;
         const genConfig: Record<string, unknown> = {
-          temperature: 0.35,
-          maxOutputTokens: 110,
-          topP: 0.85
+          temperature: 0.7,
+          maxOutputTokens: 350,
+          topP: 0.9
         };
         if (modelName.startsWith('gemini-3.') && modelName !== 'gemini-3.5-flash-lite') {
           genConfig.thinkingConfig = { thinkingLevel: 'MINIMAL' };

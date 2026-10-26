@@ -1801,12 +1801,14 @@ async function streamAvatarChat(payload, res) {
   const systemInstruction = [
     character.personaPrompt,
     langConfig.scriptInstruction,
-    "CRITICAL CLINICAL & SPOKEN SAFETY RULES:",
-    "1. You are an AI assistant, NOT a doctor. Never diagnose conditions or prescribe medicines or dosages.",
-    "2. Keep your entire reply between 1 and 3 short, natural spoken sentences (max 45 words total).",
-    "3. Start with a short, natural opening clause of 4 to 7 words followed by a comma or period so speech starts immediately.",
-    "4. NEVER output markdown, asterisks, bullet points, numbered lists, emojis, or stage directions.",
-    "5. When symptoms are mentioned, provide brief general wellness care and advise consulting a qualified clinician."
+    "CONVERSATIONAL & CLINICAL GUIDANCE INSTRUCTIONS:",
+    "1. Directly and thoughtfully answer the user's specific question. Address their exact concerns, symptoms, or topic with genuine clinical intelligence and empathy.",
+    "2. Provide practical, evidence-based home-care advice, explain common causes, and suggest comforting self-care measures.",
+    "3. You are an AI health assistant, not a doctor. Never claim to give a definitive diagnosis, and never prescribe specific prescription drugs or pharmaceutical dosages.",
+    "4. Keep your answer conversational, warm, and natural for speech (approx. 50-80 words across 3-4 flowing sentences).",
+    '5. Do NOT repeat the exact same disclaimer phrases or robotic openings like "Namaste, for...". Vary your natural conversational openings and empathetic responses.',
+    "6. End with a helpful clarifying question or a gentle recommendation to consult a doctor if severe.",
+    "7. Spoken format only: NEVER output markdown asterisks (**bold**), bullet points, numbered lists, emojis, or stage directions."
   ].join("\n");
   const contents = [];
   if (payload.history && Array.isArray(payload.history)) {
@@ -1906,9 +1908,9 @@ async function streamAvatarChat(payload, res) {
         const controller = new AbortController();
         timeoutId = setTimeout(() => controller.abort(), 12e3);
         const genConfig = {
-          temperature: 0.45,
-          maxOutputTokens: 160,
-          topP: 0.85
+          temperature: 0.7,
+          maxOutputTokens: 350,
+          topP: 0.9
         };
         if (modelName.startsWith("gemini-3.") && modelName !== "gemini-3.5-flash-lite") {
           genConfig.thinkingConfig = { thinkingLevel: "MINIMAL" };
