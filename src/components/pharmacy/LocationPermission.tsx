@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { MapPin, Navigation, Shield, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { getUserLocation } from '@/lib/placesService';
 
 interface LocationPermissionProps {
   onRequestLocation: () => void;
@@ -14,33 +15,53 @@ export default function LocationPermission({ onRequestLocation, isLoading, error
 
   const handleLocationRequest = async () => {
     setLocationStatus('requesting');
-    
+
+    const tryIpFallback = async () => {
+      try {
+        const geo = await getUserLocation();
+        setLocationStatus('granted');
+        localStorage.setItem(
+          'userLocation',
+          JSON.stringify({
+            lat: geo.lat,
+            lng: geo.lng,
+            city: geo.city,
+            timestamp: Date.now()
+          })
+        );
+        onRequestLocation();
+      } catch {
+        setLocationStatus('denied');
+        onRequestLocation();
+      }
+    };
+
     if (!navigator.geolocation) {
-      setLocationStatus('denied');
-      onRequestLocation();
+      await tryIpFallback();
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         setLocationStatus('granted');
-        // Store coordinates in localStorage for use by other components
-        localStorage.setItem('userLocation', JSON.stringify({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-          timestamp: Date.now()
-        }));
+        localStorage.setItem(
+          'userLocation',
+          JSON.stringify({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            timestamp: Date.now()
+          })
+        );
         onRequestLocation();
       },
-      (error) => {
-        setLocationStatus('denied');
-        console.error('Location error:', error);
-        onRequestLocation();
+      async (err) => {
+        console.warn('Browser GPS unavailable, using network/edge location:', err.message);
+        await tryIpFallback();
       },
       {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000 // 5 minutes
+        enableHighAccuracy: false,
+        timeout: 4000,
+        maximumAge: 300000
       }
     );
   };

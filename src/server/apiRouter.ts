@@ -66,6 +66,24 @@ export async function handleApiRequest(
   res.setHeader('Content-Type', 'application/json');
 
   try {
+    if (url === '/api/location' && (req.method === 'GET' || req.method === 'POST')) {
+      const rawLat = (req.headers['x-vercel-ip-latitude'] as string) || '';
+      const rawLng = (req.headers['x-vercel-ip-longitude'] as string) || '';
+      const city = req.headers['x-vercel-ip-city']
+        ? decodeURIComponent(req.headers['x-vercel-ip-city'] as string)
+        : null;
+      const region = (req.headers['x-vercel-ip-country-region'] as string) || null;
+      const country = (req.headers['x-vercel-ip-country'] as string) || 'IN';
+
+      const lat = rawLat ? parseFloat(rawLat) : null;
+      const lng = rawLng ? parseFloat(rawLng) : null;
+
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify({ lat, lng, city, region, country }));
+      return true;
+    }
+
     if (url === '/api/health' && req.method === 'GET') {
       res.statusCode = 200;
       res.end(JSON.stringify({ status: 'ok', time: new Date().toISOString() }));

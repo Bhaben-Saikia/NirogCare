@@ -26,16 +26,36 @@ export default function NearbyStores() {
   const [locationGranted, setLocationGranted] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [detectedCity, setDetectedCity] = useState<string | null>(null);
+
+  const syncCityFromStorage = () => {
+    try {
+      const stored = localStorage.getItem('userLocation');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.city) {
+          setDetectedCity(parsed.city);
+        }
+      }
+    } catch {
+      // Ignore
+    }
+  };
 
   // Check if location was already granted
   useEffect(() => {
+    syncCityFromStorage();
     const storedLocation = localStorage.getItem('userLocation');
     if (storedLocation) {
-      const location = JSON.parse(storedLocation);
-      const isRecent = Date.now() - location.timestamp < 300000; // 5 minutes
-      if (isRecent) {
-        setLocationGranted(true);
-        loadPharmacies();
+      try {
+        const location = JSON.parse(storedLocation);
+        const isRecent = Date.now() - (location.timestamp || 0) < 600000; // 10 minutes
+        if (isRecent) {
+          setLocationGranted(true);
+          loadPharmacies();
+        }
+      } catch {
+        // Ignore
       }
     }
   }, []);
@@ -43,14 +63,20 @@ export default function NearbyStores() {
   const handleLocationRequest = () => {
     const storedLocation = localStorage.getItem('userLocation');
     if (storedLocation) {
-      const location = JSON.parse(storedLocation);
-      if (Date.now() - location.timestamp < 300000) {
-        setLocationGranted(true);
-        loadPharmacies();
-        return;
+      try {
+        const location = JSON.parse(storedLocation);
+        if (Date.now() - (location.timestamp || 0) < 600000) {
+          if (location.city) setDetectedCity(location.city);
+          setLocationGranted(true);
+          loadPharmacies();
+          return;
+        }
+      } catch {
+        // Ignore
       }
     }
-    setLocationError('Unable to get your location. Please try again.');
+    setLocationGranted(true);
+    loadPharmacies();
   };
 
   const loadPharmacies = async () => {
@@ -58,6 +84,7 @@ export default function NearbyStores() {
     try {
       const results = await searchNearbyPharmacies();
       setPharmacies(results);
+      syncCityFromStorage();
     } catch (error) {
       console.error('Error loading pharmacies:', error);
     } finally {
@@ -114,7 +141,9 @@ export default function NearbyStores() {
                 Nearby Pharmacies
                 <Sparkles className="w-6 h-6 text-amber-300" />
               </h1>
-              <p className="text-white/80">Find medical stores around you</p>
+              <p className="text-white/80">
+                {detectedCity ? `Find medical stores near ${detectedCity}` : 'Find medical stores around you'}
+              </p>
             </div>
           </div>
         </motion.div>
@@ -182,6 +211,11 @@ export default function NearbyStores() {
                   <span>
                     <span className="font-semibold text-foreground">{filteredPharmacies.length}</span>
                     {' '}pharmacies found
+                    {detectedCity && (
+                      <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                        Near {detectedCity}
+                      </span>
+                    )}
                   </span>
                 </div>
                 {isLoading && <Loader2 className="w-5 h-5 animate-spin text-primary" />}
@@ -280,9 +314,8 @@ export default function NearbyStores() {
                       variant="outline"
                       className="w-full rounded-xl"
                       onClick={() => {
-                        const firstPharmacy = filteredPharmacies[0];
                         window.open(
-                          `https://www.google.com/maps/search/pharmacy+near+me/@${firstPharmacy.location.lat},${firstPharmacy.location.lng},14z`,
+                          'https://www.google.com/maps/search/?api=1&query=pharmacies+near+me',
                           '_blank'
                         );
                       }}

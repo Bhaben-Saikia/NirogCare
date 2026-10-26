@@ -2669,6 +2669,19 @@ async function handleApiRequest(req, res) {
   }
   res.setHeader("Content-Type", "application/json");
   try {
+    if (url === "/api/location" && (req.method === "GET" || req.method === "POST")) {
+      const rawLat = req.headers["x-vercel-ip-latitude"] || "";
+      const rawLng = req.headers["x-vercel-ip-longitude"] || "";
+      const city = req.headers["x-vercel-ip-city"] ? decodeURIComponent(req.headers["x-vercel-ip-city"]) : null;
+      const region = req.headers["x-vercel-ip-country-region"] || null;
+      const country = req.headers["x-vercel-ip-country"] || "IN";
+      const lat = rawLat ? parseFloat(rawLat) : null;
+      const lng = rawLng ? parseFloat(rawLng) : null;
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify({ lat, lng, city, region, country }));
+      return true;
+    }
     if (url === "/api/health" && req.method === "GET") {
       res.statusCode = 200;
       res.end(JSON.stringify({ status: "ok", time: (/* @__PURE__ */ new Date()).toISOString() }));
