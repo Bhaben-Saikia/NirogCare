@@ -151,6 +151,7 @@ export const TalkingAvatarApp: React.FC = () => {
   const transcriptEndRef = useRef<HTMLDivElement | null>(null);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const lastEndOfSpeechRef = useRef<number | undefined>(undefined);
+  const interimTranscriptRef = useRef<string>('');
 
   const currentCharacter: CharacterConfig = getCharacterById(selectedCharacterId);
   const currentLangConfig = getLanguageByCode(selectedLanguage);
@@ -666,9 +667,11 @@ export const TalkingAvatarApp: React.FC = () => {
       }
       if (interim) {
         if (isAvatarSpeaking) triggerBargeIn();
+        interimTranscriptRef.current = interim;
         setPartialTranscript(interim);
       }
       if (finalStr.trim()) {
+        interimTranscriptRef.current = '';
         setIsListeningMic(false);
         avatarAudioEngine.stopMicVad();
         handleSendMessage(finalStr.trim(), lastEndOfSpeechRef.current ?? Date.now());
@@ -676,6 +679,7 @@ export const TalkingAvatarApp: React.FC = () => {
     };
 
     recognition.onerror = () => {
+      interimTranscriptRef.current = '';
       setIsListeningMic(false);
       avatarAudioEngine.stopMicVad();
     };
@@ -683,6 +687,12 @@ export const TalkingAvatarApp: React.FC = () => {
     recognition.onend = () => {
       setIsListeningMic(false);
       avatarAudioEngine.stopMicVad();
+      if (interimTranscriptRef.current.trim()) {
+        const flushedSpeech = interimTranscriptRef.current.trim();
+        interimTranscriptRef.current = '';
+        setPartialTranscript('');
+        handleSendMessage(flushedSpeech, lastEndOfSpeechRef.current ?? Date.now());
+      }
     };
 
     recognitionRef.current = recognition;
@@ -945,17 +955,20 @@ export const TalkingAvatarApp: React.FC = () => {
 
           {/* Quick-Start Wellness Prompts when conversation is empty */}
           {visibleMessages.length === 0 && (
-            <div className="w-full max-w-2xl flex flex-wrap items-center justify-center gap-1.5 mb-2.5 pointer-events-auto">
-              {(QUICK_PROMPTS[selectedLanguage] || QUICK_PROMPTS.en).map((promptText, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => handleSendMessage(promptText)}
-                  className="px-3 py-1.5 rounded-full bg-card/90 hover:bg-primary hover:text-primary-foreground border border-border text-xs font-medium text-foreground shadow-sm backdrop-blur-md transition-all"
-                >
-                  {promptText}
-                </button>
-              ))}
+            <div className="w-full max-w-2xl flex flex-col items-center gap-1.5 mb-2.5 pointer-events-auto">
+              <span className="text-[11px] font-medium text-muted-foreground/80">Suggested topics:</span>
+              <div className="flex flex-wrap items-center justify-center gap-1.5">
+                {(QUICK_PROMPTS[selectedLanguage] || QUICK_PROMPTS.en).map((promptText, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleSendMessage(promptText)}
+                    className="px-3 py-1.5 rounded-full bg-card/90 hover:bg-primary hover:text-primary-foreground border border-border text-xs font-medium text-foreground shadow-sm backdrop-blur-md transition-all"
+                  >
+                    {promptText}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
@@ -971,18 +984,18 @@ export const TalkingAvatarApp: React.FC = () => {
             </div>
           )}
 
-          <div className="w-full max-w-2xl flex items-center gap-2 pointer-events-auto">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSendMessage();
+            }}
+            className="w-full max-w-2xl flex items-center gap-2 pointer-events-auto"
+          >
             <input
               type="text"
               aria-label="Message input"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendMessage();
-                }
-              }}
               placeholder="Ask a health question in English, हिन्दी, or অসমীয়া..."
               className="flex-1 h-12 rounded-2xl bg-card/95 border border-border px-4 text-sm text-foreground placeholder:text-muted-foreground shadow-md focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-md"
             />
@@ -1013,8 +1026,7 @@ export const TalkingAvatarApp: React.FC = () => {
             </button>
 
             <button
-              type="button"
-              onClick={() => handleSendMessage()}
+              type="submit"
               disabled={!inputText.trim()}
               aria-label="Send message"
               className="h-12 px-5 rounded-2xl gradient-hero text-white text-sm font-semibold shadow-md hover:opacity-95 disabled:opacity-40 disabled:pointer-events-none inline-flex items-center gap-1.5 transition-all"
@@ -1022,7 +1034,7 @@ export const TalkingAvatarApp: React.FC = () => {
               <Send className="w-4 h-4" />
               <span>Send</span>
             </button>
-          </div>
+          </form>
 
           <p className="mt-2 text-[11px] text-muted-foreground text-center max-w-2xl pointer-events-auto">
             NirogCare AI Assistant provides general wellness information only — never medical

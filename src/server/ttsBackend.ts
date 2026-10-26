@@ -345,9 +345,9 @@ class ElevenLabsTtsProvider implements TtsProvider {
           text,
           model_id: modelId,
           voice_settings: {
-            stability: 0.42,
-            similarity_boost: 0.85,
-            style: 0.22,
+            stability: 0.65,
+            similarity_boost: 0.78,
+            style: 0.0,
             use_speaker_boost: true
           }
         })

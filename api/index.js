@@ -890,9 +890,9 @@ var ElevenLabsTtsProvider = class {
           text,
           model_id: modelId,
           voice_settings: {
-            stability: 0.42,
-            similarity_boost: 0.85,
-            style: 0.22,
+            stability: 0.65,
+            similarity_boost: 0.78,
+            style: 0,
             use_speaker_boost: true
           }
         })
@@ -1300,7 +1300,7 @@ var ChunkSplitter = class {
         if (/\d/.test(prevCh) && /\d/.test(text.slice(i + 1).trimStart()[0] || "")) {
           continue;
         }
-        if (wordCount >= 2 || i >= 8) {
+        if (wordCount >= 3 && i >= 12) {
           return i + 1;
         }
       }

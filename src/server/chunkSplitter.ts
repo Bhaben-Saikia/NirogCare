@@ -147,7 +147,7 @@ export class ChunkSplitter {
         if (/\d/.test(prevCh) && /\d/.test(text.slice(i + 1).trimStart()[0] || '')) {
           continue;
         }
-        if (wordCount >= 2 || i >= 8) {
+        if (wordCount >= 3 && i >= 12) {
           return i + 1;
         }
       }
