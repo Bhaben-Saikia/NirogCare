@@ -188,6 +188,11 @@ export const TalkingAvatarApp: React.FC = () => {
 
     const connectWs = async () => {
       if (unmounted) return;
+      // Vercel serverless platform does not support persistent WebSockets;
+      // gracefully bypass WebSocket connect to use the authenticated HTTP SSE streaming engine directly.
+      if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+        return;
+      }
       try {
         if (!sessionTokenRef.current) {
           let hint = localStorage.getItem(CLIENT_HINT_STORAGE_KEY);
@@ -310,8 +315,8 @@ export const TalkingAvatarApp: React.FC = () => {
 
         ws.onclose = () => {
           wsRef.current = null;
-          if (!unmounted) {
-            const backoffMs = Math.min(8000, 500 * Math.pow(2, attempt++));
+          if (!unmounted && attempt < 2) {
+            const backoffMs = Math.min(8000, 1000 * Math.pow(2, attempt++));
             reconnectTimer = setTimeout(connectWs, backoffMs);
           }
         };

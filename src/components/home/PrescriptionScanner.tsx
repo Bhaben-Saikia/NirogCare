@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { analyzePrescription } from '@/lib/aiService';
+import { compressImageForOcr } from '@/lib/imageCompressor';
 import { searchNearbyPharmacies, openDirections, callPharmacy, type Pharmacy } from '@/lib/placesService';
 import { useReminderStore, generateReminderTimes, formatTime12Hour } from '@/stores/reminderStore';
 import { toast } from 'sonner';
@@ -219,9 +220,10 @@ export default function PrescriptionScanner() {
   const [showAllPharmacies, setShowAllPharmacies] = useState(false);
   const [hasHealthConsent, setHasHealthConsent] = useState<boolean>(() => {
     try {
-      return localStorage.getItem('nirogcare_ocr_consent') === 'true';
+      const stored = localStorage.getItem('nirogcare_ocr_consent');
+      return stored !== null ? stored === 'true' : true;
     } catch {
-      return false;
+      return true;
     }
   });
   const [isVerifiedByUser, setIsVerifiedByUser] = useState(false);
@@ -256,7 +258,7 @@ export default function PrescriptionScanner() {
     }
   };
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
@@ -266,23 +268,19 @@ export default function PrescriptionScanner() {
         });
         return;
       }
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error('File too large', {
-          description: 'Maximum document size is 10MB'
-        });
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const base64 = e.target?.result as string;
+      try {
+        const base64 = await compressImageForOcr(file);
         setSelectedImage(base64);
         setUploadedImage(base64);
         setScanResult(null);
         setIsVerifiedByUser(false);
         setPharmacies([]);
         setAISuggestions([]);
-      };
-      reader.readAsDataURL(file);
+      } catch (err: any) {
+        toast.error('Image processing failed', {
+          description: err?.message || 'Could not process the selected image.'
+        });
+      }
     }
   };
 
