@@ -58,7 +58,7 @@ NirogCare/
 ### Installation
 
 ```bash
-git clone https://github.com/bhabens170-cell/NirogCare.git
+git clone https://github.com/Bhaben-Saikia/NirogCare.git
 cd NirogCare
 npm install
 ```
