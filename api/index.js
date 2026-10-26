@@ -1914,7 +1914,7 @@ async function streamAvatarChat(payload, res) {
           maxOutputTokens: 350,
           topP: 0.9
         };
-        if (modelName.startsWith("gemini-3.") && modelName !== "gemini-3.5-flash-lite") {
+        if (modelName.startsWith("gemini-3.")) {
           genConfig.thinkingConfig = { thinkingLevel: "MINIMAL" };
         }
         const geminiRes = await fetch(endpoint, {
@@ -2394,7 +2394,8 @@ CRITICAL INSTRUCTIONS:
           ],
           generationConfig: {
             temperature: 0.1,
-            maxOutputTokens: 2048
+            maxOutputTokens: 1500,
+            thinkingConfig: { thinkingLevel: "MINIMAL" }
           }
         })
       });

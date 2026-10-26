@@ -417,7 +417,7 @@ async function handleWsChatTurn(params: {
           maxOutputTokens: 350,
           topP: 0.9
         };
-        if (modelName.startsWith('gemini-3.') && modelName !== 'gemini-3.5-flash-lite') {
+        if (modelName.startsWith('gemini-3.')) {
           genConfig.thinkingConfig = { thinkingLevel: 'MINIMAL' };
         }
         const geminiRes = await fetch(endpoint, {

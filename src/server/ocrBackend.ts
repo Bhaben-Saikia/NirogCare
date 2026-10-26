@@ -370,7 +370,8 @@ CRITICAL INSTRUCTIONS:
           ],
           generationConfig: {
             temperature: 0.1,
-            maxOutputTokens: 2048
+            maxOutputTokens: 1500,
+            thinkingConfig: { thinkingLevel: 'MINIMAL' }
           }
         })
       });
