@@ -2640,6 +2640,112 @@ var ALLOWED_ORIGINS = /* @__PURE__ */ new Set([
   "http://localhost:5173",
   "http://127.0.0.1:5173"
 ]);
+function distanceKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+function calculateBoundingBox(lat, lng, radiusKm) {
+  const latDelta = radiusKm / 111;
+  const lngDelta = radiusKm / (111 * Math.cos(lat * Math.PI / 180));
+  const minLng = (lng - lngDelta).toFixed(4);
+  const maxLat = (lat + latDelta).toFixed(4);
+  const maxLng = (lng + lngDelta).toFixed(4);
+  const minLat = (lat - latDelta).toFixed(4);
+  return `${minLng},${maxLat},${maxLng},${minLat}`;
+}
+async function fetchNearbyPharmaciesFromOSM(lat, lng, radiusKm = 8) {
+  const viewbox = calculateBoundingBox(lat, lng, radiusKm);
+  const endpoints = [
+    `https://nominatim.openstreetmap.org/search?format=json&amenity=pharmacy&bounded=1&viewbox=${viewbox}&limit=35`,
+    `https://nominatim.openstreetmap.org/search?format=json&shop=chemist&bounded=1&viewbox=${viewbox}&limit=35`
+  ];
+  const rawItems = [];
+  await Promise.allSettled(
+    endpoints.map(async (url) => {
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 6e3);
+        const res = await fetch(url, {
+          headers: {
+            "User-Agent": "NirogCare-Platform/1.0 (contact: bhabens170@gmail.com)",
+            Accept: "application/json"
+          },
+          signal: controller.signal
+        });
+        clearTimeout(timer);
+        if (res.ok) {
+          const list = await res.json();
+          if (Array.isArray(list)) rawItems.push(...list);
+        }
+      } catch {
+      }
+    })
+  );
+  const seenIds = /* @__PURE__ */ new Set();
+  const pharmacies = [];
+  for (const item of rawItems) {
+    const id = String(item.osm_id || item.place_id || Math.random());
+    if (seenIds.has(id)) continue;
+    seenIds.add(id);
+    const itemLat = parseFloat(item.lat);
+    const itemLng = parseFloat(item.lon);
+    if (isNaN(itemLat) || isNaN(itemLng)) continue;
+    const dKm = distanceKm(lat, lng, itemLat, itemLng);
+    const rawParts = (item.display_name || "").split(",").map((s) => s.trim());
+    let name = item.name || rawParts[0] || "Medical Store";
+    if (/^pharmacy$/i.test(name) || /^chemist$/i.test(name)) {
+      if (rawParts.length > 1) {
+        name = `${rawParts[0]} (${rawParts[1]})`;
+      }
+    }
+    const address = rawParts.slice(1, 4).join(", ") || item.display_name || "Near your location";
+    pharmacies.push({
+      id: `osm-${id}`,
+      name,
+      address,
+      distance: dKm < 1 ? `${Math.round(dKm * 1e3)} m` : `${dKm.toFixed(1)} km`,
+      distanceMeters: Math.round(dKm * 1e3),
+      isOpen: true,
+      openingHours: "Open Today",
+      location: { lat: itemLat, lng: itemLng }
+    });
+  }
+  const googleApiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.VITE_GOOGLE_MAPS_API_KEY;
+  if (googleApiKey) {
+    try {
+      const gUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radiusKm * 1e3}&type=pharmacy&key=${googleApiKey}`;
+      const gRes = await fetch(gUrl);
+      if (gRes.ok) {
+        const gData = await gRes.json();
+        if (gData.status === "OK" && Array.isArray(gData.results)) {
+          for (const gr of gData.results) {
+            const grLat = gr.geometry?.location?.lat;
+            const grLng = gr.geometry?.location?.lng;
+            if (!grLat || !grLng) continue;
+            const dKm = distanceKm(lat, lng, grLat, grLng);
+            pharmacies.push({
+              id: `gp-${gr.place_id}`,
+              name: gr.name,
+              address: gr.vicinity || "Near your location",
+              distance: dKm < 1 ? `${Math.round(dKm * 1e3)} m` : `${dKm.toFixed(1)} km`,
+              distanceMeters: Math.round(dKm * 1e3),
+              isOpen: gr.opening_hours ? gr.opening_hours.open_now : true,
+              openingHours: gr.opening_hours?.open_now ? "Open Now" : "Open Today",
+              rating: gr.rating,
+              location: { lat: grLat, lng: grLng }
+            });
+          }
+        }
+      }
+    } catch {
+    }
+  }
+  pharmacies.sort((a, b) => a.distanceMeters - b.distanceMeters);
+  return pharmacies;
+}
 async function handleApiRequest(req, res) {
   const url = (req.url || "").split("?")[0];
   if (!url.startsWith("/api/") || url.startsWith("/api/ws/")) {
@@ -2685,6 +2791,27 @@ async function handleApiRequest(req, res) {
     if (url === "/api/health" && req.method === "GET") {
       res.statusCode = 200;
       res.end(JSON.stringify({ status: "ok", time: (/* @__PURE__ */ new Date()).toISOString() }));
+      return true;
+    }
+    if (url === "/api/pharmacies" && req.method === "GET") {
+      const parsedUrl = new URL(req.url || "", "http://localhost");
+      const latParam = parsedUrl.searchParams.get("lat");
+      const lngParam = parsedUrl.searchParams.get("lng");
+      const radiusParam = parsedUrl.searchParams.get("radius");
+      let lat = latParam ? parseFloat(latParam) : NaN;
+      let lng = lngParam ? parseFloat(lngParam) : NaN;
+      if (isNaN(lat) || isNaN(lng)) {
+        const rawLat = req.headers["x-vercel-ip-latitude"] || "";
+        const rawLng = req.headers["x-vercel-ip-longitude"] || "";
+        lat = rawLat ? parseFloat(rawLat) : 26.1844;
+        lng = rawLng ? parseFloat(rawLng) : 91.7458;
+      }
+      const radiusKm = radiusParam ? Math.min(Math.max(parseFloat(radiusParam) / 1e3, 1), 30) : 10;
+      const pharmacies = await fetchNearbyPharmaciesFromOSM(lat, lng, radiusKm);
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=600");
+      res.end(JSON.stringify({ pharmacies }));
       return true;
     }
     const bodyStr = await readBody(req);

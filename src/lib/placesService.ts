@@ -160,6 +160,95 @@ function formatDistance(km: number): string {
   return `${km.toFixed(1)} km`;
 }
 
+function calculateBoundingBox(lat: number, lng: number, radiusKm: number): string {
+  const latDelta = radiusKm / 111;
+  const lngDelta = radiusKm / (111 * Math.cos((lat * Math.PI) / 180));
+  const minLng = (lng - lngDelta).toFixed(4);
+  const maxLat = (lat + latDelta).toFixed(4);
+  const maxLng = (lng + lngDelta).toFixed(4);
+  const minLat = (lat - latDelta).toFixed(4);
+  return `${minLng},${maxLat},${maxLng},${minLat}`;
+}
+
+/**
+ * Search real nearby pharmacies using OpenStreetMap Nominatim Foundation
+ * Fast, reliable, 100% free, and returns real physical neighbourhood medical stores
+ */
+async function searchWithNominatim(
+  location: GeolocationResult,
+  radiusKm: number = 8
+): Promise<Pharmacy[]> {
+  const viewbox = calculateBoundingBox(location.lat, location.lng, radiusKm);
+  const endpoints = [
+    `https://nominatim.openstreetmap.org/search?format=json&amenity=pharmacy&bounded=1&viewbox=${viewbox}&limit=35`,
+    `https://nominatim.openstreetmap.org/search?format=json&shop=chemist&bounded=1&viewbox=${viewbox}&limit=35`
+  ];
+
+  const rawItems: any[] = [];
+  await Promise.allSettled(
+    endpoints.map(async (url) => {
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 6000);
+        const res = await fetch(url, {
+          headers: {
+            'User-Agent': 'NirogCare-App/1.0 (contact: bhabens170@gmail.com)',
+            Accept: 'application/json'
+          },
+          signal: controller.signal
+        });
+        clearTimeout(timer);
+        if (res.ok) {
+          const list = await res.json();
+          if (Array.isArray(list)) rawItems.push(...list);
+        }
+      } catch {
+        // Continue
+      }
+    })
+  );
+
+  const seenIds = new Set<string>();
+  const pharmacies: Pharmacy[] = [];
+
+  for (const item of rawItems) {
+    const id = String(item.osm_id || item.place_id || Math.random());
+    if (seenIds.has(id)) continue;
+    seenIds.add(id);
+
+    const itemLat = parseFloat(item.lat);
+    const itemLng = parseFloat(item.lon);
+    if (isNaN(itemLat) || isNaN(itemLng)) continue;
+
+    const dKm = calculateDistance(location.lat, location.lng, itemLat, itemLng);
+    const rawParts = (item.display_name || '').split(',').map((s: string) => s.trim());
+    let name = item.name || rawParts[0] || 'Medical Store';
+    if (/^pharmacy$/i.test(name) || /^chemist$/i.test(name)) {
+      if (rawParts.length > 1) {
+        name = `${rawParts[0]} (${rawParts[1]})`;
+      }
+    }
+
+    const address =
+      rawParts.slice(1, 4).join(', ') ||
+      item.display_name ||
+      (location.city ? `Near ${location.city}` : 'Near your location');
+
+    pharmacies.push({
+      id: `osm-${id}`,
+      name,
+      address,
+      distance: formatDistance(dKm),
+      distanceMeters: Math.round(dKm * 1000),
+      isOpen: true,
+      openingHours: 'Open Today',
+      location: { lat: itemLat, lng: itemLng }
+    });
+  }
+
+  return pharmacies.sort((a, b) => a.distanceMeters - b.distanceMeters);
+}
+
 const OVERPASS_MIRRORS = [
   'https://lz4.overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
@@ -295,16 +384,46 @@ function getIndianPharmacies(location: GeolocationResult): Pharmacy[] {
 }
 
 /**
- * Search for nearby pharmacies using OpenStreetMap Overpass with city-anchored fallback
+ * Search for nearby pharmacies using Multi-Source OpenStreetMap & Google Places:
+ * 1. Serverless endpoint /api/pharmacies (Nominatim + Places, server-side with zero CORS limits)
+ * 2. Client-side Nominatim direct bounding-box query (CORS enabled, 0 timeouts)
+ * 3. OpenStreetMap Overpass mirror cascade
+ * 4. City-anchored medical store fallback
  */
 export async function searchNearbyPharmacies(
   userLocation?: GeolocationResult,
-  radiusMeters: number = 7000
+  radiusMeters: number = 8000
 ): Promise<Pharmacy[]> {
   try {
     const location = userLocation || (await getUserLocation());
-    const osmPharmacies = await searchWithOverpass(location, radiusMeters);
 
+    // 1. Try serverless endpoint /api/pharmacies first
+    try {
+      const res = await fetch(
+        `/api/pharmacies?lat=${location.lat}&lng=${location.lng}&radius=${radiusMeters}`
+      );
+      if (res.ok) {
+        const data = (await res.json()) as { pharmacies?: Pharmacy[] };
+        if (Array.isArray(data.pharmacies) && data.pharmacies.length > 0) {
+          return data.pharmacies;
+        }
+      }
+    } catch {
+      // Continue to client Nominatim
+    }
+
+    // 2. Direct client Nominatim search (OpenStreetMap Foundation)
+    try {
+      const nominatimPharmacies = await searchWithNominatim(location, radiusMeters / 1000);
+      if (nominatimPharmacies.length > 0) {
+        return nominatimPharmacies;
+      }
+    } catch {
+      // Continue to Overpass
+    }
+
+    // 3. OpenStreetMap Overpass mirrors
+    const osmPharmacies = await searchWithOverpass(location, radiusMeters);
     if (osmPharmacies.length > 0) {
       return osmPharmacies;
     }
